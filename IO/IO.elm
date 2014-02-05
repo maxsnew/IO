@@ -1,12 +1,13 @@
+module IO.IO where
 
-data IOF a = PutStr (String -> a)
+data IOF a = PutC Char a
 
 data IO a = Pure a
           | Impure (IOF (IO a))
 
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
-  PutStr p -> PutStr (f . p)
+  PutC p x -> PutC p (f x)
 
 map : (a -> b) -> IO a -> IO b
 map f io = case io of
@@ -28,3 +29,7 @@ foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b
 foldIO pur impur io = case io of
   Pure   x   -> pur x
   Impure iof -> impur (mapF (foldIO pur impur) iof)
+
+-- | User-facing API
+putChar : Char -> IO ()
+putChar c = Impure (PutC c (Pure ()))
