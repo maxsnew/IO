@@ -1,0 +1,13 @@
+{ "version": "0.1"
+, "summary": "Program with Side Effects in Elm"
+, "description":
+      "Provides an IO monad that can be run using the correct port handler."
+, "license": "BSD3"
+, "repository": "https://github.com/maxsnew/IO.git"
+, "exposed-modules":
+      [ "IO.IO"
+      , "IO.Runner"
+      ]
+, "elm-version": "0.10.1"
+, "dependencies": { "evancz/automaton": "0.1.0.1" }
+}
