@@ -10,6 +10,29 @@ getChar = Impure (GetC Pure)
 exit : Int -> IO ()
 exit = Impure . Exit
 
+mapIO : (a -> IO ()) -> [a] -> IO ()
+mapIO f xs = foldr ((>>) . f) (pure ()) xs
+
+putStr : String -> IO ()
+putStr = mapIO putChar . String.toList
+
+putStrLn : String -> IO ()
+putStrLn s = putStr s >> putChar '\n'
+
+readUntil : Char -> IO String
+readUntil end = let go s = getChar >>= \c ->
+                           if c == end
+                           then pure s
+                           else go (String.append s (String.cons c ""))
+                in go ""
+
+getLine : IO String
+getLine = readUntil '\n'
+
+-- Has to be >>= not >> because of strictness!
+forever : IO a -> IO ()
+forever m = m >>= (\_ -> forever m)
+
 data IOF a = PutC Char a
            | GetC (Char -> a)
            | Exit Int

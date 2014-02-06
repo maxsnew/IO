@@ -24,16 +24,16 @@ hooray
 That's all, folks!
 ```
 
-Implementation/Design
----------------------
+Design and Implementation
+-------------------------
 The basic IO construct is a free monad, as inspired by the
 [IOSpec](http://hackage.haskell.org/package/IOSpec) haskell
 library. Building something of type `IO a` makes an IO program that
-can be run by a runtime system. The `run` function in `IO.Runner`
-turns an `IO` program into an actor that communicates with a
-handler. The handler can then communicate with the `IO` actor if the
-ports are set up correctly. See the `mkExe` file and the files it uses
-to see how this is implemented.
+can be run by a runtime system, yielding an `a`. The `run` function in
+`IO.Runner` turns an `IO` program into an actor that communicates with
+a handler. The handler can then communicate with the `IO` actor if the
+ports are set up correctly. See the `Test.elm`, `mkExe`,
+`prescript.sh` and `handler.js` files to see how this is implemented.
 
 The implementation currently uses putChar/getChar/exit as its
 primitives, and other actions like putStrLn are built on top of
