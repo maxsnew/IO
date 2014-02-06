@@ -32,14 +32,16 @@ echo : IO ()
 echo = forever (getLine >>= putStrLn)
 
 hello : IO ()
-hello = pure "Hello, Console!" >>= \s ->
-        putStrLn s >> 
-        exit 1
+hello = putStrLn "Hello, Console!" >>
+        putStrLn "I'll echo your input:" >>
+        (getLine >>= putStrLn) >>
+        putStrLn "That's all, folks!" >>
+        exit 0
 
 port requests : Signal { mPut  : Maybe String
                        , mExit : Maybe Int
                        , mGet  : Bool
                        }
-port requests = Run.run responses echo
+port requests = Run.run responses hello
 
 port responses : Signal (Maybe String)
