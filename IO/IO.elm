@@ -25,6 +25,12 @@ bind io f = case io of
 (>>=) : IO a -> (a -> IO b) -> IO b
 (>>=) = bind
 
+seq : IO a -> IO b -> IO b
+seq x y = x >>= \_ -> y
+
+(>>) : IO a -> IO b -> IO b
+(>>) = seq
+
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b
 foldIO pur impur io = case io of
   Pure   x   -> pur x
