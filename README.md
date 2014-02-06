@@ -26,7 +26,7 @@ That's all, folks!
 
 Design and Implementation
 -------------------------
-The basic IO construct is a free monad, as inspired by the
+The basic IO construct is a free monad, inspired by the
 [IOSpec](http://hackage.haskell.org/package/IOSpec) haskell
 library. Building something of type `IO a` makes an IO program that
 can be run by a runtime system, yielding an `a`. The `run` function in
