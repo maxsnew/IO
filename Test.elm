@@ -16,12 +16,13 @@ putStrLn : String -> IO ()
 putStrLn s = putStr s >> putChar '\n'
 
 program : IO ()
-program = putStrLn "Hello, Console!"
+program = pure "Hello, Console!" >>= \s ->
+          putStrLn s >> 
+          exit 1
 
-reqs = Run.run program responses
-
-port requests : Signal (Maybe String)
-port requests = reqs
+port requests : Signal (Maybe { mPut  : Maybe String
+                              , mExit : Maybe Int
+                              })
+port requests = Run.run program responses
 
 port responses : Signal ()
---responses = (\_ -> ()) <~ every millisecond

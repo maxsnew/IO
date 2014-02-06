@@ -1,6 +1,14 @@
 module IO.IO where
 
+-- | User-facing API
+putChar : Char -> IO ()
+putChar c = Impure (PutC c (Pure ()))
+
+exit : Int -> IO ()
+exit = Impure . Exit
+
 data IOF a = PutC Char a
+           | Exit Int
 
 data IO a = Pure a
           | Impure (IOF (IO a))
@@ -8,6 +16,7 @@ data IO a = Pure a
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
   PutC p x -> PutC p (f x)
+  Exit n   -> Exit n
 
 map : (a -> b) -> IO a -> IO b
 map f io = case io of
@@ -35,7 +44,3 @@ foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b
 foldIO pur impur io = case io of
   Pure   x   -> pur x
   Impure iof -> impur (mapF (foldIO pur impur) iof)
-
--- | User-facing API
-putChar : Char -> IO ()
-putChar c = Impure (PutC c (Pure ()))
