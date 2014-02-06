@@ -15,14 +15,31 @@ putStr = mapIO putChar . String.toList
 putStrLn : String -> IO ()
 putStrLn s = putStr s >> putChar '\n'
 
-program : IO ()
-program = pure "Hello, Console!" >>= \s ->
-          putStrLn s >> 
-          exit 1
+readUntil : Char -> IO String
+readUntil end = let go s = getChar >>= \c ->
+                           if c == end
+                           then pure s
+                           else go (String.append s (String.cons c ""))                             
+                in go ""
 
-port requests : Signal (Maybe { mPut  : Maybe String
-                              , mExit : Maybe Int
-                              })
-port requests = Run.run program responses
+getLine : IO String
+getLine = readUntil '\n'
 
-port responses : Signal ()
+forever : IO a -> IO ()
+forever m = m >>= (\_ -> forever m)
+
+echo : IO ()
+echo = forever (getLine >>= putStrLn)
+
+hello : IO ()
+hello = pure "Hello, Console!" >>= \s ->
+        putStrLn s >> 
+        exit 1
+
+port requests : Signal { mPut  : Maybe String
+                       , mExit : Maybe Int
+                       , mGet  : Bool
+                       }
+port requests = Run.run responses echo
+
+port responses : Signal (Maybe String)

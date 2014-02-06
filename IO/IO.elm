@@ -4,10 +4,14 @@ module IO.IO where
 putChar : Char -> IO ()
 putChar c = Impure (PutC c (Pure ()))
 
+getChar : IO Char
+getChar = Impure (GetC Pure)
+
 exit : Int -> IO ()
 exit = Impure . Exit
 
 data IOF a = PutC Char a
+           | GetC (Char -> a)
            | Exit Int
 
 data IO a = Pure a
@@ -16,6 +20,7 @@ data IO a = Pure a
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
   PutC p x -> PutC p (f x)
+  GetC k   -> GetC (f . k)
   Exit n   -> Exit n
 
 map : (a -> b) -> IO a -> IO b
