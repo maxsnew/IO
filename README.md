@@ -9,9 +9,11 @@ Getting Started
 
 Before you begin, you must pull in both the Elm and node.js dependencies:
 
-```elm-get install evancz/automaton```
+```
+$ elm-get install evancz/automaton
+$ npm install jsdom
+```
 
-```npm install jsdom```
 (On Windows, `jsdom` is somewhat difficult to install. [Refer to this blog post](http://www.steveworkman.com/node-js/2012/installing-jsdom-on-windows/) for detailed instructions)
 
 Example
@@ -48,21 +50,9 @@ port responses : Signal (Maybe String)
 link in some javascript and then run:
 
 ```
-$ ./mkExe
-$ ./runTest
-Hello, Console!                   
-I'll echo your input:
-hooray
-hooray
-That's all, folks!
-```
-
-Or on Windows:
-
-```
->runhaskell mkExe.hs
->node runTest.js
-Hello, Console!                   
+$ runhaskell mkExe.hs
+$ node runTest.js
+Hello, Console!
 I'll echo your input:
 hooray
 hooray

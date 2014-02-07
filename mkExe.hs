@@ -1,10 +1,9 @@
-#!/usr/bin/env runhaskell
+{-# OPTIONS_GHC -Wall #-}
 
-import System.Process
-import System.Exit
-import System.Info
-import System.FilePath
-import Control.Monad
+import           Control.Monad
+import           System.Exit
+import           System.FilePath
+import           System.Process
 
 catToFile :: [FilePath] -> FilePath -> IO ()
 catToFile files outfile = do
@@ -13,21 +12,17 @@ catToFile files outfile = do
 	   	contents <- readFile filename
 	   	appendFile outfile contents
 
+main :: IO ()
 main = do
-	ExitSuccess <- rawSystem "elm" ["-mo", "Test.elm"]
-
-	putStrLn "Making exe"
-
-	let filename = 
-		if (os == "mingw32") 
-		then "runTest.js"
-		else "runTest"
-
-	catToFile ["prescript.sh", "elm-runtime.js", combine "build" "Test.js", "handler.js"] filename
-
-	ExitSuccess <- 
-		if (os == "mingw32") 
-		then return ExitSuccess
-		else rawSystem "chmod" ["+x", filename]
-
-	return ()
+  code <- rawSystem "elm" ["-mo", "Test.elm"]
+  case code of
+    ExitFailure _ -> do
+      putStrLn "Something went wrong during compilation"
+      exitWith code
+    ExitSuccess -> do
+      putStrLn "Making exe"
+      catToFile [ "prescript.sh"
+                , "elm-runtime.js"
+                , "build" </> "Test.js"
+                , "handler.js" ]
+                "runTest"
