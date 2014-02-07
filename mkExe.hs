@@ -5,6 +5,8 @@ import           System.Exit
 import           System.FilePath
 import           System.Process
 
+import           Elm.Internal.Paths as Elm
+
 catToFile :: [FilePath] -> FilePath -> IO ()
 catToFile files outfile = do
 	writeFile outfile ""
@@ -22,7 +24,7 @@ main = do
     ExitSuccess -> do
       putStrLn "Making exe"
       catToFile [ "prescript.sh"
-                , "elm-runtime.js"
+                , Elm.runtime
                 , "build" </> "Test.js"
                 , "handler.js" ]
-                "runTest"
+                "hello.js"

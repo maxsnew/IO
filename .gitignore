@@ -2,3 +2,5 @@
 build
 cache
 elm_dependencies
+dist/
+hello.js

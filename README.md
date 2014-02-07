@@ -10,6 +10,8 @@ Getting Started
 Before you begin, you must pull in both the Elm and node.js dependencies:
 
 ```
+$ cabal install elm-get # If you don't already have it installed
+$ cabal install
 $ elm-get install evancz/automaton
 $ npm install jsdom
 ```
@@ -50,8 +52,8 @@ port responses : Signal (Maybe String)
 link in some javascript and then run:
 
 ```
-$ runhaskell mkExe.hs
-$ node runTest.js
+$ cabal run
+$ node hello.js
 Hello, Console!
 I'll echo your input:
 hooray
