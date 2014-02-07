@@ -10,22 +10,20 @@ type Request  = { mPut  : Maybe String
                 , mExit : Maybe Int
                 , mGet  : Bool
                 }
-type Response = Maybe String
-type IOState  = { state  : BehState
-                , buffer : String
-                }
-data BehState = Waiting | Going | Done
 
+type Response = Maybe String
+type IOState  = { buffer : String }
 
 orSig : Signal a -> Signal b -> Signal (Either a b)
 orSig s1 s2 = merge (Left <~ s1) (Right <~ s2)
 
 start : IOState 
-start = { state = Waiting, buffer = "" }
+start = { buffer = "" }
 
-run : Signal Response -> IO () -> Signal Request
-run resps io = let pump = orSig ((\_ -> ()) <~ every millisecond) resps
-               in Auto.run (Auto.hiddenState (io, start) step) empty pump
+-- | We send a batch job of requests, all requests until IO blocks
+-- | This removes the need for a pumping signal
+run : Signal Response -> IO () -> Signal [Request]
+run resps io = Auto.run (Auto.hiddenState (io, start) step) [] resps
 
 empty : Request
 empty = { mPut = Nothing, mExit = Nothing, mGet = False }
@@ -39,26 +37,43 @@ exit n = { empty | mExit <- Just n }
 getS : Request
 getS = { empty | mGet <- True }
 
-(.~) : IOState -> BehState -> IOState
-st .~ b = { st | state <- b }
+-- | Extract all of the requests that can be run now
+extractRequests : IO a -> State IOState ([Request], IO a)
+extractRequests io = 
+  case io of
+    IO.Pure x -> pure ([exit 0], IO.Pure x)
+    IO.Impure iof -> case iof of
+      IO.PutC c k -> extractRequests k >>= \(rs, k') ->
+                     pure (putS (String.cons c "") :: rs, k')
+      IO.Exit n   -> pure ([exit 0], io)
+      IO.GetC k   ->
+        ask >>= \st ->
+        case String.uncons st.buffer of
+          Nothing -> pure ([getS], io)
+          Just (c, rest) ->
+            put ({ buffer = rest }) >>= \_ ->
+            extractRequests (k c)
 
-step : Either () Response -> (IO a, IOState) -> ((IO a, IOState), Request)
+step : Response -> (IO a, IOState) -> ((IO a, IOState), [Request])
 step resp (io, st) = 
-  case st.state of
-    Waiting -> case resp of
-      Left  () -> ((io, st), empty)
-      Right _  -> step resp (io, st .~ Going)
-    Done -> ((io, st), exit 0)
-    Going -> case resp of
-      Right (Just s) ->
-        let newST = { st | buffer <- String.append st.buffer s }
-        in ((io, newST), empty)
-      _ -> case io of
-        IO.Pure _ -> ((io, st .~ Done), exit 0)
-        IO.Impure iof -> case iof of
-          IO.PutC c k -> ((k, st .~ Going), putS <| String.cons c "")
-          IO.Exit n   -> ((io, st .~ Done), exit n)
-          IO.GetC k   -> case String.uncons st.buffer of
-            Nothing        -> ((io, st), getS)
-            Just (c, rest) -> let newST = { st | buffer <- rest }
-                              in ((k c, newST), empty)
+  let newST = case resp of 
+        Nothing -> st
+        Just s  -> { st | buffer <- String.append st.buffer s }
+      (newST', (rs, k)) = extractRequests io newST
+  in ((k, newST'), rs)
+
+-- | State monad
+type State s a = s -> (s, a)
+
+pure : a -> State s a
+pure x = \s -> (s, x)
+
+(>>=) : State s a -> (a -> State s b) -> State s b
+f >>= k = \s -> let (s', y) = f s
+                in k y s'
+
+ask : State s s
+ask = \s -> (s, s)
+
+put : s -> State s ()
+put s = \_ -> (s, ())

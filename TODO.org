@@ -4,7 +4,7 @@
     - Allow node modules to import elm IO modules
       - Look at https://github.com/arsatiki/elmloader
     - Allow elm IO modules to import node modules
-  - [ ] Get rid of the `every millisecond` pump in the interpreter
+  - [X] Get rid of the `every millisecond` pump in the interpreter
     - Should be able to do this by sending lists of requests
   - [ ] Add error handling
     - Use the Either monad?

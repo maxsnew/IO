@@ -1,7 +1,7 @@
 
 (function(){
     var stdin = process.stdin;
-    var handler = function(request) {
+    var handle = function(request) {
         // Debugging:
         //console.log("Bleh: %j", request);
         if (!(request.mPut === null)) {
@@ -10,6 +10,11 @@
             process.exit(request.mExit);
         } else if (request.mGet) {
             stdin.resume();
+        }
+    }
+    var handler = function(reqs) {
+        for (var i = 0; i < reqs.length; i++) {
+            handle(reqs[i]);
         }
     }
     var worker = Elm.worker(Elm.Main
