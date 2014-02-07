@@ -5,7 +5,12 @@ This repo provides a library for writing console-based programs in
 Elm.
 
 An elm Program:
+
 ```haskell
+import open IO.IO
+import IO.Runner (Request, Response)
+import IO.Runner as Run
+
 hello : IO ()
 hello = putStrLn "Hello, Console!" >>
         putStrLn "I'll echo your input:" >>
@@ -13,7 +18,22 @@ hello = putStrLn "Hello, Console!" >>
         putStrLn "That's all, folks!" >>
         exit 0
 ```
-when run:
+
+with some boilerplate
+
+```haskell
+-- | Can't use a type alias in ports, yet :/
+port requests : Signal [{ mPut  : Maybe String
+                        , mExit : Maybe Int
+                        , mGet  : Bool
+                        }]
+port requests = Run.run responses echo
+
+port responses : Signal (Maybe String)
+```
+
+link in some javascript and then run:
+
 ```
 $ ./mkExe
 $ ./runTest
