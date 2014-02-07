@@ -44,6 +44,18 @@ hooray
 That's all, folks!
 ```
 
+Or on Windows:
+
+```
+>runhaskell mkExe.hs
+>node runTest.js
+Hello, Console!                   
+I'll echo your input:
+hooray
+hooray
+That's all, folks!
+```
+
 Design and Implementation
 -------------------------
 The basic IO construct is a free monad, inspired by the
