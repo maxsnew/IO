@@ -70,7 +70,7 @@ can be run by a runtime system, yielding an `a`. The `run` function in
 `IO.Runner` turns an `IO` program into an actor that communicates with
 a handler. The handler can then communicate with the `IO` actor if the
 ports are set up correctly. See the `Test.elm`, `mkExe`,
-`prescript.sh` and `handler.js` files to see how this is implemented.
+`prescript.js` and `handler.js` files to see how this is implemented.
 
 The implementation currently uses putChar/getChar/exit as its
 primitives, and other actions like putStrLn are built on top of

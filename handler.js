@@ -1,4 +1,5 @@
 
+// Elm goes there ^
 (function(){
     var stdin = process.stdin;
     var handle = function(request) {
@@ -32,5 +33,6 @@
     // Start msg
     worker.ports.responses.send(null);
 })();
-}
+} // Close the callback
+// Run!
 jsdom.env('<p>bleh</p>', [], callback);
