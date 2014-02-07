@@ -4,6 +4,19 @@ IO in Elm
 This repo provides a library for writing console-based programs in
 Elm.
 
+Getting Started
+---------------
+
+Before you begin, you must pull in both the Elm and node.js dependencies:
+
+```elm-get install evancz/automaton```
+
+```npm install jsdom```
+(On Windows, `jsdom` is somewhat difficult to install. [Refer to this blog post](http://www.steveworkman.com/node-js/2012/installing-jsdom-on-windows/) for detailed instructions)
+
+Example
+-------
+
 An elm Program:
 
 ```haskell
