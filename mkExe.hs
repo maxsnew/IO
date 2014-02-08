@@ -23,7 +23,7 @@ main = do
       exitWith code
     ExitSuccess -> do
       putStrLn "Making exe"
-      catToFile [ "prescript.sh"
+      catToFile [ "prescript.js"
                 , Elm.runtime
                 , "build" </> "Test.js"
                 , "handler.js" ]
