@@ -4,8 +4,10 @@ import           Control.Monad
 import           System.Exit
 import           System.FilePath
 import           System.Process
+import           System.Environment
 
 import           Elm.Internal.Paths as Elm
+import qualified Paths_ElmIO as ElmIO
 
 catToFile :: [FilePath] -> FilePath -> IO ()
 catToFile files outfile = do
@@ -16,6 +18,7 @@ catToFile files outfile = do
 
 main :: IO ()
 main = do
+  (infile:outfile:_) <- getArgs
   code <- rawSystem "elm" ["-mo", "Test.elm"]
   case code of
     ExitFailure _ -> do
@@ -23,8 +26,10 @@ main = do
       exitWith code
     ExitSuccess -> do
       putStrLn "Making exe"
-      catToFile [ "prescript.js"
+      prescript <- ElmIO.getDataFileName "prescript.js"
+      handler   <- ElmIO.getDataFileName "handler.js"
+      catToFile [ prescript
                 , Elm.runtime
-                , "build" </> "Test.js"
-                , "handler.js" ]
-                "hello.js"
+                , "build" </> replaceExtension infile "js"
+                , handler ]
+                outfile
