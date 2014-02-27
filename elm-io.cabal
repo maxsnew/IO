@@ -14,7 +14,7 @@ maintainer:          maxsnew@gmail.com
 category:            Language
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          prescript.js handler.js
+data-files:          prescript.js handler.js IO/*.elm
 cabal-version:       >=1.10
 
 executable elm-io

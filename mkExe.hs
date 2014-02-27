@@ -19,7 +19,8 @@ catToFile files outfile = do
 main :: IO ()
 main = do
   (infile:outfile:_) <- getArgs
-  code <- rawSystem "elm" ["-mo", "Test.elm"]
+  dir <- ElmIO.getDataDir
+  code <- rawSystem "elm" ["-mo", "--src-dir=" ++ dir, infile]
   case code of
     ExitFailure _ -> do
       putStrLn "Something went wrong during compilation"
