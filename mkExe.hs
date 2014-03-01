@@ -18,19 +18,22 @@ catToFile files outfile = do
 
 main :: IO ()
 main = do
-  (infile:outfile:_) <- getArgs
-  dir <- ElmIO.getDataDir
-  code <- rawSystem "elm" ["-mo", "--src-dir=" ++ dir, infile]
-  case code of
-    ExitFailure _ -> do
-      putStrLn "Something went wrong during compilation"
-      exitWith code
-    ExitSuccess -> do
-      putStrLn "Making exe"
-      prescript <- ElmIO.getDataFileName "prescript.js"
-      handler   <- ElmIO.getDataFileName "handler.js"
-      catToFile [ prescript
-                , Elm.runtime
-                , "build" </> replaceExtension infile "js"
-                , handler ]
-                outfile
+  args <- getArgs
+  case args of
+    [infile, outfile] -> do
+      dir <- ElmIO.getDataDir
+      code <- rawSystem "elm" ["-mo", "--src-dir=" ++ dir, infile]
+      case code of
+        ExitFailure _ -> do
+          putStrLn "Something went wrong during compilation"
+          exitWith code
+        ExitSuccess -> do
+          putStrLn "Making exe"
+          prescript <- ElmIO.getDataFileName "prescript.js"
+          handler   <- ElmIO.getDataFileName "handler.js"
+          catToFile [ prescript
+                    , Elm.runtime
+                    , "build" </> replaceExtension infile "js"
+                    , handler ]
+                    outfile
+    _ -> putStrLn $ "Expected input file and output file arguments, but got " ++ show (length args) ++ " args."
