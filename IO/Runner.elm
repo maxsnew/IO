@@ -45,7 +45,7 @@ extractRequests io =
     IO.Impure iof -> case iof of
       IO.PutC c k -> extractRequests k >>= \(rs, k') ->
                      pure (putS (String.cons c "") :: rs, k')
-      IO.Exit n   -> pure ([exit 0], io)
+      IO.Exit n   -> pure ([exit n], io)
       IO.GetC k   ->
         ask >>= \st ->
         case String.uncons st.buffer of
