@@ -62,7 +62,8 @@ main = do
         "--default-ports" -> do
           -- Adding boilerplate to a temp file
           ports <- ElmIO.getDataFileName "boilerplate.elm"
-          (src,handle) <- openTempFile "" "ElmIO.elm"
+          (src,handle) <- openTempFile "" infile
+          putStrLn src
           hClose handle
           catToFile [infile, ports] src
           addImports src
