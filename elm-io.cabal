@@ -14,7 +14,7 @@ maintainer:          maxsnew@gmail.com
 category:            Language
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          prescript.js handler.js IO/*.elm
+data-files:          prescript.js handler.js boilerplate.elm imports.elm IO/*.elm
 cabal-version:       >=1.10
 
 executable elm-io
@@ -23,6 +23,7 @@ executable elm-io
                        , Elm >= 0.11
                        , process
                        , filepath
+                       , directory
   other-modules:       Paths_ElmIO
                        
   -- hs-source-dirs:      
