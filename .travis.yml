@@ -1,0 +1,7 @@
+language: haskell
+install:
+  - cabal install
+  - echo "y" | elm-get install evancz/automaton
+  - npm install jsdom
+before_script: elm-io Test.elm test.js
+script: echo "dis test" | node test.js
