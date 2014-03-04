@@ -5,7 +5,7 @@ install:
   - sudo ln -s ~/.cabal/bin/elm /usr/local/bin/elm
   - sudo ln -s ~/.cabal/bin/elm-get /usr/local/bin/elm-get
   - sudo ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
-  - echo "y" | elm-get install evancz/automaton
+  - echo "n" | elm-get install evancz/automaton
   - npm install jsdom
 before_script: elm-io Test.elm test.js
 script: echo "dis test" | node test.js
