@@ -1,4 +1,4 @@
-IO in Elm
+IO in Elm [![Build Status](https://travis-ci.org/maxsnew/IO.png?branch=master)](https://travis-ci.org/maxsnew/IO)
 =========
 
 This repo provides a library for writing console-based programs in
