@@ -1,7 +1,7 @@
 module IO.Runner where
 
 import Automaton as Auto
-import open Either
+import Either (..)
 
 import IO.IO as IO
 import IO.IO (IO)
