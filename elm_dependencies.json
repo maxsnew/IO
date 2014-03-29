@@ -8,6 +8,6 @@
       [ "IO.IO"
       , "IO.Runner"
       ]
-, "elm-version": "0.10.1"
-, "dependencies": { "evancz/automaton": "0.1.0.1" }
+, "elm-version": "0.12"
+, "dependencies": { "evancz/automaton": "0.1.0.2" }
 }
