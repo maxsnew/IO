@@ -4,3 +4,5 @@ cache
 elm_dependencies
 dist/
 hello.js
+*.elmi
+*.elmo
