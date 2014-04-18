@@ -1,10 +1,12 @@
 module IO.IO where
 
+import String
+
 -- | User-facing API
 
 -- | IO Actions
 putChar : Char -> IO ()
-putChar c = Impure (PutC c (Pure ()))
+putChar c = Impure (PutS (String.cons c "") (Pure ()))
 
 getChar : IO Char
 getChar = Impure (GetC Pure)
@@ -13,7 +15,7 @@ exit : Int -> IO ()
 exit = Impure . Exit
 
 putStr : String -> IO ()
-putStr = mapIO putChar . String.toList
+putStr s = Impure (PutS s (Pure ()))
 
 putStrLn : String -> IO ()
 putStrLn s = putStr s >> putChar '\n'
@@ -66,7 +68,7 @@ seq x y = x >>= \_ -> y
 forever : IO a -> IO ()
 forever m = m >>= (\_ -> forever m)
 
-data IOF a = PutC Char a      -- ^ the a is the next computation
+data IOF a = PutS String a    -- ^ the a is the next computation
            | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
            | Exit Int         -- ^ since there is no parameter, this must terminate
 
@@ -75,7 +77,7 @@ data IO a = Pure a
 
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
-  PutC p x -> PutC p (f x)
+  PutS p x -> PutS p (f x)
   GetC k   -> GetC (f . k)
   Exit n   -> Exit n
 

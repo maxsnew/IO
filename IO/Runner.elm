@@ -2,7 +2,8 @@ module IO.Runner where
 
 import Automaton as Auto
 import Either (..)
-
+import Trampoline
+    
 import IO.IO as IO
 import IO.IO (IO)
 
@@ -43,8 +44,8 @@ extractRequests io =
   case io of
     IO.Pure x -> pure ([exit 0], IO.Pure x)
     IO.Impure iof -> case iof of
-      IO.PutC c k -> extractRequests k >>= \(rs, k') ->
-                     pure (putS (String.cons c "") :: rs, k')
+      IO.PutS s k -> extractRequests k >>= \(rs, k') ->
+                     pure (flattenReqs (putS s) rs, k')
       IO.Exit n   -> pure ([exit n], io)
       IO.GetC k   ->
         ask >>= \st ->
@@ -54,6 +55,24 @@ extractRequests io =
             put ({ buffer = rest }) >>= \_ ->
             extractRequests (k c)
 
+flattenReqs : Request -> [Request] -> [Request]
+flattenReqs r rs =
+    let loop r rs n = 
+            case r.mExit of
+              Just n -> Trampoline.Done [r]
+              _ ->
+                  case (r.mPut, rs) of
+                    (Just s1, r2 :: rs') ->
+                        case r2.mPut of
+                          Just s2 ->
+                              let newS = s1 ++ s2
+                              in if n >= 100
+                                 then Trampoline.Continue (\_ -> loop (putS newS) rs' 0)
+                                 else loop (putS newS) rs' (n + 1)
+                          _ -> Trampoline.Done (r :: rs)
+                    _ -> Trampoline.Done (r :: rs)
+    in Trampoline.trampoline <| loop r rs 0
+                         
 step : Response -> (IO a, IOState) -> ((IO a, IOState), [Request])
 step resp (io, st) = 
   let newST = case resp of 

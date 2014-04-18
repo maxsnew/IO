@@ -9,10 +9,16 @@ import String
 echo : IO ()
 echo = forever (getLine >>= putStrLn)
 
+loop : IO ()
+loop = getLine >>= \s ->
+       if s == "exit"
+       then pure ()
+       else putStrLn s >> loop
+       
 hello : IO ()
 hello = putStrLn "Hello, Console!"       >>
-        putStrLn "I'll echo your input:" >>
-        (getLine >>= putStrLn)           >>
+        putStrLn "I'll echo your input until you say \"exit\":" >>
+        loop >>         
         putStrLn "That's all, folks!"    >>
         exit 0
 
