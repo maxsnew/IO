@@ -25,6 +25,7 @@ An elm Program:
 import open IO.IO
 import IO.Runner (Request, Response)
 import IO.Runner as Run
+import Json
 
 hello : IO ()
 hello = putStrLn "Hello, Console!" >>
@@ -36,10 +37,7 @@ hello = putStrLn "Hello, Console!" >>
 with some boilerplate
 ```haskell
 -- | Can't use a type alias in ports, yet :/
-port requests : Signal [{ mPut  : Maybe String
-                        , mExit : Maybe Int
-                        , mGet  : Bool
-                        }]
+port requests : Signal Json.Value
 port requests = Run.run responses hello
 
 port responses : Signal (Maybe String)
@@ -87,13 +85,11 @@ following code will be inserted after the module delcaration:
 ```haskell
 import IO.Runner (Request, Response)
 import IO.Runner as Run
+import Json
 ```
 and the following code will be appended to the end of the file:
 ```haskell
-port requests : Signal [{ mPut  : Maybe String
-                        , mExit : Maybe Int
-                        , mGet  : Bool
-                        }]
+port requests : Signal Json.Value
 port requests = Run.run responses console
 
 port responses : Signal (Maybe String)
