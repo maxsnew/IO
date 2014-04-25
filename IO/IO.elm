@@ -75,6 +75,8 @@ data IOF a = PutS String a    -- ^ the a is the next computation
 data IO a = Pure a
           | Impure (IOF (IO a))
 
+type IOK r a = (a -> IOF r) -> IOF r
+
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
   PutS p x -> PutS p (f x)

@@ -4,13 +4,16 @@
     var stdin = process.stdin;
     var handle = function(request) {
         // Debugging:
-        //console.log("Bleh: %j", request);
-        if (!(request.mPut === null)) {
-            process.stdout.write(request.mPut);
-        } else if (!(request.mExit === null)) {
-            process.exit(request.mExit);
-        } else if (request.mGet) {
+        // console.log("Bleh: %j", request);
+        switch(request.ctor) {
+        case 'Put':
+            process.stdout.write(request.val);
+            break;
+        case 'Get':
             stdin.resume();
+            break;
+        case 'Exit':
+            process.exit(request.val);
         }
     }
     var handler = function(reqs) {

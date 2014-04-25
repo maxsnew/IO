@@ -4,6 +4,7 @@ import IO.IO (..)
 import IO.Runner (Request, Response)
 import IO.Runner as Run
 
+import Json
 import String
 
 echo : IO ()
@@ -24,10 +25,7 @@ hello = putStrLn "Hello, Console!"       >>
         exit 0
 
 -- | Can't use a type alias in ports, yet :/
-port requests : Signal [{ mPut  : Maybe String
-                        , mExit : Maybe Int
-                        , mGet  : Bool
-                        }]
+port requests : Signal Json.Value
 port requests = Run.run responses hello
 
 port responses : Signal (Maybe String)
