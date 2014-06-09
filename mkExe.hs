@@ -77,5 +77,8 @@ main = do
           removeFile $ "cache" </> replaceExtension src "elmi"
           removeFile $ "cache" </> replaceExtension src "elmo"
 
-        _ -> putStrLn $ "Invalid flag: " ++ show flag ++ ". Valid flags are: --default-ports" 
-    _ -> putStrLn $ "Expected input file and output file arguments, but got " ++ show (length args) ++ " args."
+        _ -> usage
+    _ -> usage
+
+usage :: IO ()
+usage = putStrLn $ "USAGE: mkExe [--default-ports] <input-file> <output-file> [--default-ports]"
