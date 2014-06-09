@@ -14,16 +14,18 @@ maintainer:          maxsnew@gmail.com
 category:            Language
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          prescript.js handler.js boilerplate.elm imports.elm IO/*.elm
+data-files:          share/prescript.js share/handler.js share/boilerplate.elm share/imports.elm IO/*.elm
 cabal-version:       >=1.10
 
 executable elm-io
   main-is:             mkExe.hs
   build-depends:       base >=4.6 && < 5
+                       , pandoc
                        , Elm >= 0.11
                        , process
                        , filepath
                        , directory
+                       , attoparsec
   other-modules:       Paths_ElmIO
                        
   -- hs-source-dirs:      
