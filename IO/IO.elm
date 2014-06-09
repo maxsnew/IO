@@ -27,6 +27,9 @@ readUntil end = let go s = getChar >>= \c ->
                            else go (String.append s (String.cons c ""))
                 in go ""
 
+writeFile : { file : String, content : String } -> IO ()
+writeFile obj = Impure (WriteF obj (Pure ()))
+
 getLine : IO String
 getLine = readUntil '\n'
 
@@ -38,6 +41,9 @@ map f io = case io of
 
 mapIO : (a -> IO ()) -> [a] -> IO ()
 mapIO f xs = foldr ((>>) . f) (pure ()) xs
+
+forEach : [a] -> (a -> IO ()) -> IO ()
+forEach xs f = mapIO f xs
 
 pure : a -> IO a
 pure = Pure
@@ -71,6 +77,7 @@ forever m = m >>= (\_ -> forever m)
 data IOF a = PutS String a    -- ^ the a is the next computation
            | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
            | Exit Int         -- ^ since there is no parameter, this must terminate
+           | WriteF { file : String, content : String} a
 
 data IO a = Pure a
           | Impure (IOF (IO a))
@@ -82,6 +89,7 @@ mapF f iof = case iof of
   PutS p x -> PutS p (f x)
   GetC k   -> GetC (f . k)
   Exit n   -> Exit n
+  WriteF obj x -> WriteF obj (f x)
 
 -- | Not actually used, but maybe can be for the interpreter?
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b

@@ -2,6 +2,7 @@
 // Elm goes there ^
 (function(){
     var stdin = process.stdin;
+    var fs    = require('fs');
     var handle = function(request) {
         // Debugging:
         // console.log("Bleh: %j", request);
@@ -14,6 +15,10 @@
             break;
         case 'Exit':
             process.exit(request.val);
+            break;
+        case 'WriteFile':
+            fs.writeFileSync(request.file, request.content);
+            break;
         }
     }
     var handler = function(reqs) {

@@ -12,6 +12,7 @@ import IO.IO (IO)
 data Request = Put String
              | Exit Int
              | Get
+             | WriteFile { file : String, content : String}
 
 type Response = Maybe String
 type IOState  = { buffer : String }
@@ -37,6 +38,10 @@ serialize =
           Exit n -> mkObj [ ("ctor", JSON.String "Exit")
                           , ("val", JSON.Number . toFloat <| n )
                           ]
+          WriteFile { file, content} -> mkObj [ ("ctor", JSON.String "WriteFile")
+                                              , ("file", JSON.String file)
+                                              , ("content", JSON.String content)
+                                              ]
     in JSON.Array . map serReq
 
 putS : String -> Request
@@ -48,15 +53,19 @@ exit = Exit
 getS : Request
 getS = Get
 
+writeF : { file : String, content : String } -> Request
+writeF = WriteFile
+
 -- | Extract all of the requests that can be run now
 extractRequests : IO a -> State IOState ([Request], IO a)
 extractRequests io = 
   mapSt (mapFst flattenReqs) <| case io of
     IO.Pure x -> pure ([exit 0], IO.Pure x)
     IO.Impure iof -> case iof of
-      IO.PutS s k -> mapSt (mapFst (\rs -> putS s :: rs)) <| extractRequests k
-      IO.Exit n   -> pure ([exit n], io)
-      IO.GetC k   ->
+      IO.PutS s k     -> mapSt (mapFst (\rs -> putS s :: rs)) <| extractRequests k
+      IO.WriteF obj k -> mapSt (mapFst (\rs -> writeF obj :: rs)) <| extractRequests k
+      IO.Exit n       -> pure ([exit n], io)
+      IO.GetC k       ->
         ask >>= \st ->
         case String.uncons st.buffer of
           Nothing -> pure ([getS], io)
