@@ -1,6 +1,5 @@
 module IO.Runner where
 
-import Automaton as Auto
 import Dict
 import Either (..)
 import Json as JSON
@@ -24,7 +23,7 @@ start : IOState
 start = { buffer = "" }
 
 run : Signal Response -> IO () -> Signal JSON.Value
-run resps io = serialize <~ Auto.run (Auto.hiddenState (\_ -> io, start) step) [] resps
+run resps io = serialize . snd <~ foldp (\resp (tup, _) -> step resp tup) ((\_ -> io, start), []) resps
 
 serialize : [Request] -> JSON.Value
 serialize =

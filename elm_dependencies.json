@@ -9,5 +9,5 @@
       , "IO.Runner"
       ]
 , "elm-version": "0.12.1"
-, "dependencies": { "evancz/automaton": "0.1.0.3" }
+, "dependencies": { }
 }

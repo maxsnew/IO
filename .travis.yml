@@ -1,12 +1,8 @@
 language: haskell
 install:
-  - cabal install language-ecmascript-0.15.4
-  - cabal install elm-get
   - cabal install
   - sudo ln -s ~/.cabal/bin/elm /usr/local/bin/elm
-  - sudo ln -s ~/.cabal/bin/elm-get /usr/local/bin/elm-get
   - sudo ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
-  - echo "n" | elm-get install evancz/automaton
   - npm install jsdom
 before_script: elm-io Test.elm test.js
 script: echo "exit" | node test.js > /dev/null

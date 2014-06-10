@@ -7,12 +7,10 @@ Elm.
 Getting Started
 ---------------
 
-Before you begin, you must pull in both the Elm and node.js dependencies:
+Before you begin, compile and pull in node.js dependencies:
 
 ```
-$ cabal install elm-get # If you don't already have it installed
 $ cabal install
-$ elm-get install evancz/automaton
 $ npm install jsdom
 ```
 
@@ -95,7 +93,7 @@ port requests = Run.run responses console
 port responses : Signal (Maybe String)
 ```
 The file will then be compiled to `test.js`, which is runnable with node.
-Keep in mind that the `evancz/automaton` and `jsdom` dependencies must still
+Keep in mind that the `jsdom` dependency must still
 be installed in each project directory!
 
 A working example can be seen in the [Elm-Test Travis CI configuration](https://github.com/deadfoxygrandpa/Elm-Test/blob/master/.travis.yml).
