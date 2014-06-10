@@ -20,7 +20,7 @@ cabal-version:       >=1.10
 executable elm-io
   main-is:             src/Main.hs
   build-depends:       base >=4.6 && < 5
-                       , Elm >= 0.11
+                       , Elm >= 0.12
                        , process
                        , filepath
                        , directory
