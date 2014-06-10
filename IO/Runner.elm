@@ -23,7 +23,11 @@ start : IOState
 start = { buffer = "" }
 
 run : Signal Response -> IO () -> Signal JSON.Value
-run resps io = serialize . snd <~ foldp (\resp (tup, _) -> step resp tup) ((\_ -> io, start), []) resps
+run resps io = 
+  let init               = (\_ -> io, start, [])
+      f resp (io, st, _) = step resp io st
+      third (_, _, z)    = z
+  in serialize . third <~ foldp f init resps
 
 serialize : [Request] -> JSON.Value
 serialize =
@@ -89,13 +93,13 @@ flattenReqs rs =
     in Trampoline.trampoline <| loop rs [] 0
                          
 -- | We send a batch job of requests, all requests until IO blocks
-step : Response -> (() -> IO a, IOState) -> ((() -> IO a, IOState), [Request])
-step resp (io, st) = 
+step : Response -> (() -> IO a) -> IOState -> (() -> IO a, IOState, [Request])
+step resp io st = 
   let newST = case resp of 
         Nothing -> st
         Just s  -> { st | buffer <- String.append st.buffer s }
       (newST', (rs, k)) = extractRequests (io ()) newST
-  in ((k, newST'), rs)
+  in (k, newST', rs)
 
 -- | State monad
 type State s a = s -> (s, a)
