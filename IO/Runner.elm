@@ -3,6 +3,7 @@ module IO.Runner where
 import Dict
 import Either (..)
 import Json as JSON
+import String
 import Trampoline
     
 import IO.IO as IO
