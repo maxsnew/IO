@@ -18,15 +18,12 @@ data-files:          share/prescript.js share/handler.js share/boilerplate.elm s
 cabal-version:       >=1.10
 
 executable elm-io
-  main-is:             mkExe.hs
+  main-is:             src/Main.hs
   build-depends:       base >=4.6 && < 5
-                       , aeson-pretty
-                       , pandoc
                        , Elm >= 0.11
                        , process
                        , filepath
                        , directory
-                       , attoparsec
   other-modules:       Paths_ElmIO
                        
   -- hs-source-dirs:      
