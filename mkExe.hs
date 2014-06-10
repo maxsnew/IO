@@ -39,7 +39,10 @@ buildJS code infile outfile = case code of
 compile :: FilePath -> [String] -> IO ExitCode
 compile infile elmFlags = do
   dir <- ElmIO.getDataDir
-  rawSystem "elm" $ ["-mo", "--src-dir=" ++ dir] ++ elmFlags ++ [infile]
+  system "elm" $ ["-mo", "--src-dir=" ++ dir] ++ elmFlags ++ [infile]
+  where system cmd args = do
+          putStrLn . unwords $ cmd:args
+          rawSystem cmd args
 
 addImports :: FilePath -> IO ()
 addImports src = do
