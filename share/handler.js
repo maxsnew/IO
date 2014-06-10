@@ -3,6 +3,9 @@
 (function(){
     var stdin = process.stdin;
     var fs    = require('fs');
+    var worker = Elm.worker(Elm.Main
+                            , {responses: null }
+                           );
     var handle = function(request) {
         // Debugging:
         // console.log("Bleh: %j", request);
@@ -25,10 +28,10 @@
         for (var i = 0; i < reqs.length; i++) {
             handle(reqs[i]);
         }
+        if (reqs.length > 0 && reqs[reqs.length - 1].ctor !== 'Get') {
+            worker.ports.responses.send("");
+        }
     }
-    var worker = Elm.worker(Elm.Main
-                            , {responses: null }
-                           );
     worker.ports.requests.subscribe(handler);
     
     // Read

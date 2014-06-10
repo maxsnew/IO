@@ -24,7 +24,7 @@ start : IOState
 start = { buffer = "" }
 
 run : Signal Response -> IO () -> Signal JSON.Value
-run resps io = serialize <~ Auto.run (Auto.hiddenState (io, start) step) [] resps
+run resps io = serialize <~ Auto.run (Auto.hiddenState (\_ -> io, start) step) [] resps
 
 serialize : [Request] -> JSON.Value
 serialize =
@@ -57,18 +57,18 @@ writeF : { file : String, content : String } -> Request
 writeF = WriteFile
 
 -- | Extract all of the requests that can be run now
-extractRequests : IO a -> State IOState ([Request], IO a)
+extractRequests : IO a -> State IOState ([Request], () -> IO a)
 extractRequests io = 
-  mapSt (mapFst flattenReqs) <| case io of
-    IO.Pure x -> pure ([exit 0], IO.Pure x)
+  case io of
+    IO.Pure x -> pure ([exit 0], \_ -> IO.Pure x)
     IO.Impure iof -> case iof of
-      IO.PutS s k     -> mapSt (mapFst (\rs -> putS s :: rs)) <| extractRequests k
-      IO.WriteF obj k -> mapSt (mapFst (\rs -> writeF obj :: rs)) <| extractRequests k
-      IO.Exit n       -> pure ([exit n], io)
+      IO.PutS s k     -> mapSt (mapFst (\rs -> putS s :: rs)) <| pure ([], k)
+      IO.WriteF obj k -> mapSt (mapFst (\rs -> writeF obj :: rs)) <| pure ([], k)
+      IO.Exit n       -> pure ([exit n], \_ -> io)
       IO.GetC k       ->
         ask >>= \st ->
         case String.uncons st.buffer of
-          Nothing -> pure ([getS], io)
+          Nothing -> pure ([getS], \_ -> io)
           Just (c, rest) ->
             put ({ buffer = rest }) >>= \_ ->
             extractRequests (k c)
@@ -90,12 +90,12 @@ flattenReqs rs =
     in Trampoline.trampoline <| loop rs [] 0
                          
 -- | We send a batch job of requests, all requests until IO blocks
-step : Response -> (IO a, IOState) -> ((IO a, IOState), [Request])
+step : Response -> (() -> IO a, IOState) -> ((() -> IO a, IOState), [Request])
 step resp (io, st) = 
   let newST = case resp of 
         Nothing -> st
         Just s  -> { st | buffer <- String.append st.buffer s }
-      (newST', (rs, k)) = extractRequests io newST
+      (newST', (rs, k)) = extractRequests (io ()) newST
   in ((k, newST'), rs)
 
 -- | State monad

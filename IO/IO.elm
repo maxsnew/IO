@@ -6,7 +6,7 @@ import String
 
 -- | IO Actions
 putChar : Char -> IO ()
-putChar c = Impure (PutS (String.cons c "") (Pure ()))
+putChar c = Impure (PutS (String.cons c "") (\_ -> Pure ()))
 
 getChar : IO Char
 getChar = Impure (GetC Pure)
@@ -15,7 +15,7 @@ exit : Int -> IO ()
 exit = Impure . Exit
 
 putStr : String -> IO ()
-putStr s = Impure (PutS s (Pure ()))
+putStr s = Impure (PutS s (\_ -> Pure ()))
 
 putStrLn : String -> IO ()
 putStrLn s = putStr s >> putChar '\n'
@@ -28,7 +28,7 @@ readUntil end = let go s = getChar >>= \c ->
                 in go ""
 
 writeFile : { file : String, content : String } -> IO ()
-writeFile obj = Impure (WriteF obj (Pure ()))
+writeFile obj = Impure (WriteF obj (\_ -> Pure ()))
 
 getLine : IO String
 getLine = readUntil '\n'
@@ -74,10 +74,10 @@ seq x y = x >>= \_ -> y
 forever : IO a -> IO ()
 forever m = m >>= (\_ -> forever m)
 
-data IOF a = PutS String a    -- ^ the a is the next computation
+data IOF a = PutS String (() -> a)    -- ^ the a is the next computation
            | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
            | Exit Int         -- ^ since there is no parameter, this must terminate
-           | WriteF { file : String, content : String} a
+           | WriteF { file : String, content : String} (() -> a)
 
 data IO a = Pure a
           | Impure (IOF (IO a))
@@ -86,10 +86,10 @@ type IOK r a = (a -> IOF r) -> IOF r
 
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
-  PutS p x -> PutS p (f x)
+  PutS p k -> PutS p (f . k)
   GetC k   -> GetC (f . k)
   Exit n   -> Exit n
-  WriteF obj x -> WriteF obj (f x)
+  WriteF obj k -> WriteF obj (f . k)
 
 -- | Not actually used, but maybe can be for the interpreter?
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b
