@@ -1,7 +1,6 @@
 module IO.Runner where
 
 import Dict
-import Either (..)
 import Json as JSON
 import String
 import Trampoline
@@ -16,9 +15,6 @@ data Request = Put String
 
 type Response = Maybe String
 type IOState  = { buffer : String }
-
-orSig : Signal a -> Signal b -> Signal (Either a b)
-orSig s1 s2 = merge (Left <~ s1) (Right <~ s2)
 
 start : IOState 
 start = { buffer = "" }
