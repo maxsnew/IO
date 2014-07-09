@@ -1,5 +1,8 @@
 language: haskell
 install:
+  - cabal install attoparsec-0.11.3.4
+  - cabal install scientific-0.2.0.2
+  - cabal install syb-0.3.7
   - cabal install
   - sudo ln -s ~/.cabal/bin/elm /usr/local/bin/elm
   - sudo ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
