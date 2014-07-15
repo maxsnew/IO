@@ -12,7 +12,14 @@ import           Elm.Internal.Paths as Elm
 import qualified Paths_ElmIO as ElmIO
 
 shareFile :: FilePath -> IO FilePath
-shareFile = ElmIO.getDataFileName . ("share" </>)
+shareFile name = do
+  path <- ElmIO.getDataFileName $ "share" </> name
+  exists <- doesFileExist path
+  if exists
+    then return path
+    else do
+      env <- getEnv "ELM_IO"
+      return $ env </> name
 
 catToFile :: [FilePath] -> FilePath -> IO ()
 catToFile files outfile = do
