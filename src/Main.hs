@@ -49,11 +49,11 @@ addImports src = do
   imports <- shareFile "imports.elm"
   imports' <- readFile imports
   srcFile <- strictRead src
-  let (firstLine:rest) = lines srcFile 
+  let (firstLine:rest) = lines srcFile
   let new = unlines $ [firstLine, imports'] ++ rest
   writeFile src new
-  where strictRead file = do 
-          string <- readFile file 
+  where strictRead file = do
+          string <- readFile file
           length string `seq` return string
 
 parseArgs :: [String] -> IO (Bool, [String], FilePath, FilePath)
