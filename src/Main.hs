@@ -19,7 +19,17 @@ shareFile name = do
     then return path
     else do
       env <- getEnv "ELM_IO"
-      return $ env </> name
+      return $ env </> "share" </> name
+
+getDataDir :: IO FilePath
+getDataDir = do
+  path <- ElmIO.getDataDir
+  exists <- doesFileExist path
+  if exists
+    then return path
+    else do
+      env <- getEnv "ELM_IO"
+      return env
 
 catToFile :: [FilePath] -> FilePath -> IO ()
 catToFile files outfile = do
@@ -45,7 +55,7 @@ buildJS code infile outfile = case code of
 
 compile :: FilePath -> [String] -> IO ExitCode
 compile infile elmFlags = do
-  dir <- ElmIO.getDataDir
+  dir <- getDataDir
   system "elm" $ ["-mo", "--src-dir=" ++ dir] ++ elmFlags ++ [infile]
   where system cmd args = do
           putStrLn . unwords $ cmd:args
