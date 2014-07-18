@@ -7,5 +7,5 @@ install:
   - sudo ln -s ~/.cabal/bin/elm /usr/local/bin/elm
   - sudo ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
   - npm install jsdom
-before_script: elm-io Test.elm test.js
+before_script: elm-io test/Test.elm test.js
 script: echo "exit" | node test.js > /dev/null
