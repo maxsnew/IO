@@ -32,13 +32,12 @@ hello = putStrLn "Hello, Console!" >>
         putStrLn "That's all, folks!" >>
         exit 0
 ```
-with some boilerplate
+with some boilerplate (which can be automatically added, see below)
 ```haskell
--- | Can't use a type alias in ports, yet :/
-port requests : Signal Json.Value
+port requests : Signal Request
 port requests = Run.run responses hello
 
-port responses : Signal (Maybe String)
+port responses : Signal Response
 ```
 link in some javascript and then run:
 ```
@@ -87,10 +86,10 @@ import Json
 ```
 and the following code will be appended to the end of the file:
 ```haskell
-port requests : Signal Json.Value
+port requests : Signal Request
 port requests = Run.run responses console
 
-port responses : Signal (Maybe String)
+port responses : Signal Response
 ```
 The file will then be compiled to `test.js`, which is runnable with node.
 Keep in mind that the `jsdom` dependency must still
