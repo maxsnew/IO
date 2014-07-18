@@ -8,25 +8,39 @@ import Trampoline
 import IO.IO as IO
 import IO.IO (IO)
 
-data Request = Put String
-             | Exit Int
-             | Get
-             | WriteFile { file : String, content : String}
+-- Internal Request representation
+data IRequest = Put String
+              | Exit Int
+              | Get
+              | WriteFile { file : String, content : String}
+type IResponse = Maybe String
 
-type Response = Maybe String
+
+-- User-facing Request representation
+type Request = JSON.Value
+type Response = JSON.Value
 type IOState  = { buffer : String }
 
 start : IOState 
 start = { buffer = "" }
 
-run : Signal Response -> IO () -> Signal JSON.Value
+run : Signal Response -> IO () -> Signal Request
 run resps io = 
   let init               = (\_ -> io, start, [])
-      f resp (io, st, _) = step resp io st
+      f resp (io, st, _) = step (deserialize resp) io st
       third (_, _, z)    = z
   in serialize . third <~ foldp f init resps
 
-serialize : [Request] -> JSON.Value
+deserialize : Response -> IResponse
+deserialize resp = 
+  case resp of
+    JSON.Object d -> 
+      case Dict.get "Just" d of
+        Just (JSON.String s) -> Just s
+        _                    -> Nothing
+    _        -> Nothing
+
+serialize : [IRequest] -> JSON.Value
 serialize =
   let mkObj = JSON.Object . Dict.fromList
       serReq req = 
@@ -44,20 +58,20 @@ serialize =
                                               ]
     in JSON.Array . map serReq
 
-putS : String -> Request
+putS : String -> IRequest
 putS = Put
 
-exit : Int -> Request
+exit : Int -> IRequest
 exit = Exit
 
-getS : Request
+getS : IRequest
 getS = Get
 
-writeF : { file : String, content : String } -> Request
+writeF : { file : String, content : String } -> IRequest
 writeF = WriteFile
 
 -- | Extract all of the requests that can be run now
-extractRequests : IO a -> State IOState ([Request], () -> IO a)
+extractRequests : IO a -> State IOState ([IRequest], () -> IO a)
 extractRequests io = 
   case io of
     IO.Pure x -> pure ([exit 0], \_ -> IO.Pure x)
@@ -73,7 +87,7 @@ extractRequests io =
             put ({ buffer = rest }) >>= \_ ->
             extractRequests (k c)
 
-flattenReqs : [Request] -> [Request]
+flattenReqs : [IRequest] -> [IRequest]
 flattenReqs rs =
   let loop rs acc n =
     if n >= 100
@@ -90,7 +104,7 @@ flattenReqs rs =
     in Trampoline.trampoline <| loop rs [] 0
                          
 -- | We send a batch job of requests, all requests until IO blocks
-step : Response -> (() -> IO a) -> IOState -> (() -> IO a, IOState, [Request])
+step : IResponse -> (() -> IO a) -> IOState -> (() -> IO a, IOState, [IRequest])
 step resp io st = 
   let newST = case resp of 
         Nothing -> st

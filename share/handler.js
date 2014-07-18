@@ -6,6 +6,9 @@
     var worker = Elm.worker(Elm.Main
                             , {responses: null }
                            );
+    var just = function(v) {
+        return { 'Just': v};
+    }
     var handle = function(request) {
         // Debugging:
         // console.log("Bleh: %j", request);
@@ -29,7 +32,7 @@
             handle(reqs[i]);
         }
         if (reqs.length > 0 && reqs[reqs.length - 1].ctor !== 'Get') {
-            worker.ports.responses.send("");
+            worker.ports.responses.send(just(""));
         }
     }
     worker.ports.requests.subscribe(handler);
@@ -38,7 +41,7 @@
     stdin.on('data', function(chunk) {
         //console.log('Got' + chunk);
         stdin.pause();
-        worker.ports.responses.send(chunk.toString());
+        worker.ports.responses.send(just(chunk.toString()));
     })
 
     // Start msg
