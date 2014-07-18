@@ -89,4 +89,4 @@ main = do
             removeFile $ "cache" </> replaceExtension src "elmo"
 
 usage :: IO ()
-usage = putStrLn $ "USAGE: mkExe [--default-ports] <input-file> <output-file> [elm-flags]*"
+usage = putStrLn $ "USAGE: elm-io [--default-ports] <input-file> <output-file> [elm-flags]*"
