@@ -1,6 +1,6 @@
 
 -- IO boilerplate
-port requests : Signal Json.Value
+port requests : Signal Request
 port requests = Run.run responses console
 
-port responses : Signal (Maybe String)
+port responses : Signal Response
