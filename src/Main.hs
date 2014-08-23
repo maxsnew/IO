@@ -21,20 +21,16 @@ catToFile files outfile = do
 	   	contents <- readFile filename
 	   	appendFile outfile contents
 
-buildJS :: ExitCode -> FilePath -> FilePath -> IO ()
-buildJS code infile outfile = case code of
-  ExitFailure _ -> do
-    putStrLn "Something went wrong during compilation"
-    exitWith code
-  ExitSuccess -> do
-    putStrLn "Making exe"
-    prescript <- shareFile "prescript.js"
-    handler   <- shareFile "handler.js"
-    catToFile [ prescript
-              , Elm.runtime
-              , "build" </> replaceExtension infile "js"
-              , handler ]
-              outfile
+buildJS :: FilePath -> FilePath -> IO ()
+buildJS infile outfile = do
+  putStrLn "Making exe"
+  prescript <- shareFile "prescript.js"
+  handler   <- shareFile "handler.js"
+  catToFile [ prescript
+            , Elm.runtime
+            , "build" </> replaceExtension infile "js"
+            , handler ]
+            outfile
 
 compile :: FilePath -> [String] -> IO ExitCode
 compile infile elmFlags = do
@@ -64,13 +60,23 @@ parseArgs raw = case raw of
   inF:outF:rest -> return (False, rest, inF, outF)
   where usageExit = usage >> (exitWith $ ExitFailure 1)
 
+handleCode :: ExitCode -> IO a -> IO a -> IO ()
+handleCode code fail succ = case code of
+  ExitFailure _ -> do
+    putStrLn "Something went wrong during compilation"
+    fail
+    exitWith code
+  ExitSuccess   -> do
+    succ
+    return ()
+
 main :: IO ()
 main = do
   rawArgs <- getArgs
   (defaultPorts, elmFlags, infile, outfile) <- parseArgs rawArgs
   if not defaultPorts
     then do code <- compile infile elmFlags
-            buildJS code infile outfile
+            handleCode code (return ()) (buildJS infile outfile)
     else do -- Adding boilerplate to a temp file
             ports <- shareFile "boilerplate.elm"
             (src,handle) <- openTempFile "" infile
@@ -78,15 +84,16 @@ main = do
             catToFile [infile, ports] src
             addImports src
 
+            let cleanSrc = removeFile src
+                cleanAll = do
+                  cleanSrc
+                  removeFile $ "build" </> replaceExtension src "js"
+                  removeFile $ "cache" </> replaceExtension src "elmi"
+                  removeFile $ "cache" </> replaceExtension src "elmo"
+                  
             -- Build output js file
             code <- compile src elmFlags
-            buildJS code src outfile
-
-            -- Cleanup
-            removeFile src
-            removeFile $ "build" </> replaceExtension src "js"
-            removeFile $ "cache" </> replaceExtension src "elmi"
-            removeFile $ "cache" </> replaceExtension src "elmo"
+            handleCode code cleanSrc (buildJS src outfile >> cleanAll)
 
 usage :: IO ()
 usage = putStrLn $ "USAGE: elm-io [--default-ports] <input-file> <output-file> [elm-flags]*"
