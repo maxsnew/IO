@@ -1,14 +1,15 @@
 {-# OPTIONS_GHC -Wall #-}
 
-import           Control.Monad
-import           System.Directory
-import           System.Environment
-import           System.Exit
-import           System.FilePath
+import           Control.Monad      (forM_)
+import           System.Directory   (removeFile)
+import           System.Environment (getArgs)
+import           System.Exit        (ExitCode (ExitSuccess, ExitFailure),
+                                     exitWith)
+import           System.FilePath    (replaceExtension, (<.>), (</>))
 import           System.IO          (hClose, openTempFile)
-import           System.Process
+import           System.Process     (rawSystem)
 
-import           Elm.Internal.Paths as Elm
+import qualified Elm.Internal.Paths as Elm
 import qualified Paths_ElmIO        as ElmIO
 
 shareFile :: FilePath -> IO FilePath
@@ -90,7 +91,7 @@ main = do
                   removeFile $ "build" </> replaceExtension src "js"
                   removeFile $ "cache" </> replaceExtension src "elmi"
                   removeFile $ "cache" </> replaceExtension src "elmo"
-                  
+
             -- Build output js file
             code <- compile src elmFlags
             handleCode code cleanSrc (buildJS src outfile >> cleanAll)
