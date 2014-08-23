@@ -52,7 +52,7 @@ map f io =
 
 mapIO : (a -> IO ()) -> [a] -> IO ()
 mapIO f xs =
-    foldr ((>>) . f) (pure ()) xs
+    foldr (seq << f) (pure ()) xs
 
 forEach : [a] -> (a -> IO ()) -> IO ()
 forEach xs f = mapIO f xs
@@ -81,12 +81,10 @@ bind io f =
 seq : IO a -> IO b -> IO b
 seq x y = x >>= \_ -> y
 
-(>>) : IO a -> IO b -> IO b
-(>>) = seq
-
--- Has to be >>= not >> because of strictness!
+-- forever appears in a closure to avoid infinite recursion.
 forever : IO a -> IO ()
-forever m = m >>= (\_ -> forever m)
+forever io =
+    io >>= (\_ -> forever io)
 
 data IOF a
     = PutS String (() -> a)    -- ^ the a is the next computation
@@ -103,10 +101,10 @@ type IOK r a = (a -> IOF r) -> IOF r
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof =
     case iof of
-        PutS p k -> PutS p (f . k)
-        GetC k -> GetC (f . k)
+        PutS p k -> PutS p (f << k)
+        GetC k -> GetC (f << k)
         Exit code -> Exit code
-        WriteF obj k -> WriteF obj (f . k)
+        WriteF obj k -> WriteF obj (f << k)
 
 -- | Not actually used, but maybe can be for the interpreter?
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b

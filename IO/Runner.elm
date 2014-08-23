@@ -33,9 +33,10 @@ run responses io =
         update response (io, st, _) =
             step (deserialize response) io st
 
-        third (_, _, z) = z
+        toJson (_, _, requests) =
+            serialize requests
     in
-        serialize . third <~ foldp update init responses
+        toJson <~ foldp update init responses
 
 deserialize : Response -> IResponse
 deserialize resp = 
@@ -154,7 +155,8 @@ pure : a -> State s a
 pure x = \s -> (s, x)
 
 mapSt : (a -> b) -> State s a -> State s b
-mapSt f sf = sf >>= (pure . f)
+mapSt f sf =
+    sf >>= (pure << f)
 
 (>>=) : State s a -> (a -> State s b) -> State s b
 f >>= k = \s -> let (s', y) = f s
