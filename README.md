@@ -26,10 +26,10 @@ import IO.Runner as Run
 import Json
 
 hello : IO ()
-hello = putStrLn "Hello, Console!" >>
-        putStrLn "I'll echo your input:" >>
-        (getLine >>= putStrLn) >>
-        putStrLn "That's all, folks!" >>
+hello = putStrLn "Hello, Console!" >>>
+        putStrLn "I'll echo your input:" >>>
+        (getLine >>= putStrLn) >>>
+        putStrLn "That's all, folks!" >>>
         exit 0
 ```
 with some boilerplate (which can be automatically added, see below)
@@ -74,7 +74,7 @@ module Main where
 import open IO.IO
 
 console : IO ()
-console = putStrLn "This is a test" >>
+console = putStrLn "This is a test" >>>
           exit 0
 ```
 When this file is compiled like `elm-io --default-ports Test.elm test.js`, the

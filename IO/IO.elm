@@ -12,13 +12,13 @@ getChar : IO Char
 getChar = Impure (GetC Pure)
 
 exit : Int -> IO ()
-exit = Impure . Exit
+exit = Impure << Exit
 
 putStr : String -> IO ()
 putStr s = Impure (PutS s (\_ -> Pure ()))
 
 putStrLn : String -> IO ()
-putStrLn s = putStr s >> putChar '\n'
+putStrLn s = putStr s >>> putChar '\n'
 
 readUntil : Char -> IO String
 readUntil end = let go s = getChar >>= \c ->
@@ -40,7 +40,7 @@ map f io = case io of
   Impure iof -> Impure (mapF (map f) iof)
 
 mapIO : (a -> IO ()) -> [a] -> IO ()
-mapIO f xs = foldr ((>>) . f) (pure ()) xs
+mapIO f xs = foldr (seq << f) (pure ()) xs
 
 forEach : [a] -> (a -> IO ()) -> IO ()
 forEach xs f = mapIO f xs
@@ -67,8 +67,8 @@ bind io f = case io of
 seq : IO a -> IO b -> IO b
 seq x y = x >>= \_ -> y
 
-(>>) : IO a -> IO b -> IO b
-(>>) = seq
+(>>>) : IO a -> IO b -> IO b
+(>>>) = seq
 
 -- Has to be >>= not >> because of strictness!
 forever : IO a -> IO ()
@@ -86,10 +86,10 @@ type IOK r a = (a -> IOF r) -> IOF r
 
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
-  PutS p k -> PutS p (f . k)
-  GetC k   -> GetC (f . k)
+  PutS p k -> PutS p (f << k)
+  GetC k   -> GetC (f << k)
   Exit n   -> Exit n
-  WriteF obj k -> WriteF obj (f . k)
+  WriteF obj k -> WriteF obj (f << k)
 
 -- | Not actually used, but maybe can be for the interpreter?
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b

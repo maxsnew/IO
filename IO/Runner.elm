@@ -29,7 +29,7 @@ run resps io =
   let init               = (\_ -> io, start, [])
       f resp (io, st, _) = step (deserialize resp) io st
       third (_, _, z)    = z
-  in serialize . third <~ foldp f init resps
+  in serialize << third <~ foldp f init resps
 
 deserialize : Response -> IResponse
 deserialize resp = 
@@ -42,7 +42,7 @@ deserialize resp =
 
 serialize : [IRequest] -> JSON.Value
 serialize =
-  let mkObj = JSON.Object . Dict.fromList
+  let mkObj = JSON.Object << Dict.fromList
       serReq req = 
         case req of
           Put s -> mkObj [ ("ctor", JSON.String "Put")
@@ -50,13 +50,13 @@ serialize =
                          ]
           Get -> mkObj [ ("ctor", JSON.String "Get") ]
           Exit n -> mkObj [ ("ctor", JSON.String "Exit")
-                          , ("val", JSON.Number . toFloat <| n )
+                          , ("val", JSON.Number << toFloat <| n )
                           ]
           WriteFile { file, content} -> mkObj [ ("ctor", JSON.String "WriteFile")
                                               , ("file", JSON.String file)
                                               , ("content", JSON.String content)
                                               ]
-    in JSON.Array . map serReq
+    in JSON.Array << map serReq
 
 putS : String -> IRequest
 putS = Put
@@ -119,7 +119,7 @@ pure : a -> State s a
 pure x = \s -> (s, x)
 
 mapSt : (a -> b) -> State s a -> State s b
-mapSt f sf = sf >>= (pure . f)
+mapSt f sf = sf >>= (pure << f)
 
 (>>=) : State s a -> (a -> State s b) -> State s b
 f >>= k = \s -> let (s', y) = f s
