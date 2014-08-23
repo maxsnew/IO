@@ -9,10 +9,12 @@ import IO.IO as IO
 import IO.IO (IO)
 
 -- Internal Request representation
-data IRequest = Put String
-              | Exit Int
-              | Get
-              | WriteFile { file : String, content : String}
+data IRequest
+    = Put String
+    | Exit Int
+    | Get
+    | WriteFile { file : String, content : String }
+
 type IResponse = Maybe String
 
 
@@ -25,38 +27,52 @@ start : IOState
 start = { buffer = "" }
 
 run : Signal Response -> IO () -> Signal Request
-run resps io = 
-  let init               = (\_ -> io, start, [])
-      f resp (io, st, _) = step (deserialize resp) io st
-      third (_, _, z)    = z
-  in serialize . third <~ foldp f init resps
+run responses io = 
+    let init = (\_ -> io, start, [])
+
+        update response (io, st, _) =
+            step (deserialize response) io st
+
+        third (_, _, z) = z
+    in
+        serialize . third <~ foldp update init responses
 
 deserialize : Response -> IResponse
 deserialize resp = 
-  case resp of
-    JSON.Object d -> 
-      case Dict.get "Just" d of
-        Just (JSON.String s) -> Just s
-        _                    -> Nothing
-    _        -> Nothing
+    case resp of
+        JSON.Object d -> 
+            case Dict.get "Just" d of
+                Just (JSON.String s) -> Just s
+                _ -> Nothing
+
+        _ -> Nothing
 
 serialize : [IRequest] -> JSON.Value
-serialize =
-  let mkObj = JSON.Object . Dict.fromList
-      serReq req = 
-        case req of
-          Put s -> mkObj [ ("ctor", JSON.String "Put")
-                         , ("val",  JSON.String s)
-                         ]
-          Get -> mkObj [ ("ctor", JSON.String "Get") ]
-          Exit n -> mkObj [ ("ctor", JSON.String "Exit")
-                          , ("val", JSON.Number . toFloat <| n )
+serialize requests =
+    let mkObj pairs =
+            JSON.Object (Dict.fromList pairs)
+
+        toJson request = 
+            case request of
+                Put string ->
+                    mkObj [ ("ctor", JSON.String "Put")
+                          , ("val",  JSON.String string)
                           ]
-          WriteFile { file, content} -> mkObj [ ("ctor", JSON.String "WriteFile")
-                                              , ("file", JSON.String file)
-                                              , ("content", JSON.String content)
-                                              ]
-    in JSON.Array . map serReq
+                Get ->
+                    mkObj [ ("ctor", JSON.String "Get") ]
+
+                Exit code ->
+                    mkObj [ ("ctor", JSON.String "Exit")
+                          , ("val", JSON.Number (toFloat code) )
+                          ]
+
+                WriteFile { file, content } ->
+                    mkObj [ ("ctor", JSON.String "WriteFile")
+                          , ("file", JSON.String file)
+                          , ("content", JSON.String content)
+                          ]
+      in
+          JSON.Array (map toJson requests)
 
 putS : String -> IRequest
 putS = Put
@@ -73,44 +89,63 @@ writeF = WriteFile
 -- | Extract all of the requests that can be run now
 extractRequests : IO a -> State IOState ([IRequest], () -> IO a)
 extractRequests io = 
-  case io of
-    IO.Pure x -> pure ([exit 0], \_ -> IO.Pure x)
-    IO.Impure iof -> case iof of
-      IO.PutS s k     -> mapSt (mapFst (\rs -> putS s :: rs)) <| pure ([], k)
-      IO.WriteF obj k -> mapSt (mapFst (\rs -> writeF obj :: rs)) <| pure ([], k)
-      IO.Exit n       -> pure ([exit n], \_ -> io)
-      IO.GetC k       ->
-        ask >>= \st ->
-        case String.uncons st.buffer of
-          Nothing -> pure ([getS], \_ -> io)
-          Just (c, rest) ->
-            put ({ buffer = rest }) >>= \_ ->
-            extractRequests (k c)
+    case io of
+        IO.Pure x ->
+            pure ([exit 0], \_ -> IO.Pure x)
+
+        IO.Impure iof ->
+            case iof of
+                IO.PutS s k ->
+                    mapSt (mapFst (\rs -> putS s :: rs)) <| pure ([], k)
+
+                IO.WriteF obj k ->
+                    mapSt (mapFst (\rs -> writeF obj :: rs)) <| pure ([], k)
+
+                IO.Exit code ->
+                    pure ([exit code], \_ -> io)
+
+                IO.GetC k ->
+                    ask >>= \st ->
+                    case String.uncons st.buffer of
+                      Nothing -> pure ([getS], \_ -> io)
+                      Just (c, rest) ->
+                          put { buffer = rest } >>= \_ ->
+                          extractRequests (k c)
 
 flattenReqs : [IRequest] -> [IRequest]
-flattenReqs rs =
-  let loop rs acc n =
-    if n >= 100
-    then Trampoline.Continue (\_ -> loop rs acc 0)
-    else 
-      case rs of
-        []  -> Trampoline.Done <| reverse acc
-        [r] -> loop [] (r::acc) (n+1)
-        r1 :: r2 :: rs' ->
-        case (r1, r2) of
-          (Exit n, _)      -> loop [] (r1::acc) (n+1)
-          (Put s1, Put s2) -> loop (putS (s1++s2) :: rs') acc (n+1)
-          _                -> loop (r2::rs') (r1::acc) (n+1)
-    in Trampoline.trampoline <| loop rs [] 0
+flattenReqs requests =
+    let loop rs acc n =
+            if  | n >= 100 ->
+                    Trampoline.Continue (\_ -> loop rs acc 0)
+                | otherwise ->
+                    case rs of
+                      []  -> Trampoline.Done <| reverse acc
+                      [r] -> loop [] (r::acc) (n+1)
+                      r1 :: r2 :: rs' ->
+                          case (r1, r2) of
+                              (Exit n, _) ->
+                                  loop [] (r1::acc) (n+1)
+
+                              (Put s1, Put s2) ->
+                                  loop (putS (s1++s2) :: rs') acc (n+1)
+
+                              _ ->
+                                  loop (r2::rs') (r1::acc) (n+1)
+    in
+        Trampoline.trampoline <| loop requests [] 0
                          
 -- | We send a batch job of requests, all requests until IO blocks
 step : IResponse -> (() -> IO a) -> IOState -> (() -> IO a, IOState, [IRequest])
-step resp io st = 
-  let newST = case resp of 
-        Nothing -> st
-        Just s  -> { st | buffer <- String.append st.buffer s }
-      (newST', (rs, k)) = extractRequests (io ()) newST
-  in (k, newST', rs)
+step resp io st =
+    let newST =
+            case resp of 
+                Nothing -> st
+                Just s ->
+                    { st | buffer <- String.append st.buffer s }
+
+        (newST', (rs, k)) = extractRequests (io ()) newST
+    in
+        (k, newST', rs)
 
 -- | State monad
 type State s a = s -> (s, a)
