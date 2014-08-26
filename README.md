@@ -101,8 +101,9 @@ A working example can be seen in the [Elm-Test Travis CI configuration](https://
 Troubleshooting
 ---------------
 If you have a problem first make sure:
-1. You have jsdom installed
-2. You named the module `Main` and not something else.
+
+  1. You have jsdom installed
+  2. You named the module `Main` and not something else.
 
 Design and Implementation
 -------------------------
