@@ -4,7 +4,7 @@ install:
   - echo "echo hello" > hello
   - chmod +x hello
   - sudo ln -s hello /usr/local/bin/hello
-  - hello
+  - /usr/local/bin/hello
   - exit 1
   - git clone https://github.com/elm-lang/Elm.git
   - cabal sandbox init
