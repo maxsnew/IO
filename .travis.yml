@@ -3,7 +3,7 @@ install:
   - echo $PATH
   - echo "echo hello" > hello
   - chmod +x hello
-  - sudo ln -s hello /usr/loca/bin/hello
+  - sudo ln -s hello /usr/local/bin/hello
   - hello
   - exit 1
   - git clone https://github.com/elm-lang/Elm.git
