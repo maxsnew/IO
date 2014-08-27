@@ -1,9 +1,11 @@
 language: haskell
 install:
-  - cabal install attoparsec-0.11.3.4
-  - cabal install scientific-0.2.0.2
-  - cabal install syb-0.3.7
+  - git clone https://github.com/elm-lang/Elm.git
+  - cd Elm
+  - cabal sandbox init
   - cabal install
+  - cd ..
+  - cabal sandbox add-source Elm
   - sudo ln -s ~/.cabal/bin/elm /usr/local/bin/elm
   - sudo ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
   - npm install jsdom
