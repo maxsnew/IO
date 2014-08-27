@@ -6,8 +6,8 @@ install:
   - cabal sandbox add-source Elm
   - cabal install
   - ls .cabal-sandbox/bin
-  - sudo ln -s `pwd`/.cabal-sandbox/bin/elm    /usr/local/bin/elm
-  - sudo ln -s `pwd`/.cabal-sandbox/bin/elm-io /usr/local/bin/elm-io
+  - sudo cp `pwd`/.cabal-sandbox/bin/elm    /usr/local/bin/elm
+  - sudo cp `pwd`/.cabal-sandbox/bin/elm-io /usr/local/bin/elm-io
   - ./.cabal-sandbox/bin/elm --version
   - stat ./.cabal-sandbox/bin/elm-io
   - ls /usr/local/bin
