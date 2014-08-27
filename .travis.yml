@@ -9,8 +9,8 @@ install:
   - sudo ln -s .cabal-sandbox/bin/elm    /usr/local/bin/elm
   - sudo ln -s .cabal-sandbox/bin/elm-io /usr/local/bin/elm-io
   - ./.cabal-sandbox/bin/elm --version
-  - ./.cabal-sandbox/bin/elm-io
-  - /usr/local/binelm --version
+  - ./.cabal-sandbox/bin/elm-io --help
+  - /usr/local/bin/elm --version
   - elm
   - npm install jsdom
 before_script: elm-io test/Test.elm test.js
