@@ -1,5 +1,7 @@
 language: haskell
 install:
+  - echo $PATH
+  - exit 1
   - git clone https://github.com/elm-lang/Elm.git
   - cabal sandbox init
   - cabal sandbox add-source Elm
