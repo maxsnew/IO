@@ -5,8 +5,8 @@ install:
   - cabal sandbox add-source Elm
   - cabal install
   - ls .cabal-sandbox/bin
-  - ln -s ~/.cabal/bin/elm    /usr/local/bin/elm
-  - ln -s ~/.cabal/bin/elm-io /usr/local/bin/elm-io
+  - sudo ln -s .cabal-sandbox/bin/elm    /usr/local/bin/elm
+  - sudo ln -s .cabal-sandbox/bin/elm-io /usr/local/bin/elm-io
   - elm --version
   - elm-io
   - npm install jsdom
