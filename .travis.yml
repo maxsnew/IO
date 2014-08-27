@@ -1,11 +1,6 @@
 language: haskell
 install:
   - echo $PATH
-  - echo "echo hello" > hello
-  - chmod +x hello
-  - sudo ln -s hello /usr/local/bin/hello
-  - /usr/local/bin/hello
-  - exit 1
   - git clone https://github.com/elm-lang/Elm.git
   - cabal sandbox init
   - cabal sandbox add-source Elm
