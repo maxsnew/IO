@@ -1,5 +1,6 @@
 module IO.IO where
 
+import List
 import String
 
 -- | User-facing API
@@ -39,10 +40,10 @@ map f io = case io of
   Pure   a   -> Pure (f a)
   Impure iof -> Impure (mapF (map f) iof)
 
-mapIO : (a -> IO ()) -> [a] -> IO ()
-mapIO f xs = foldr (seq << f) (pure ()) xs
+mapIO : (a -> IO ()) -> List a -> IO ()
+mapIO f xs = List.foldr (seq << f) (pure ()) xs
 
-forEach : [a] -> (a -> IO ()) -> IO ()
+forEach : List a -> (a -> IO ()) -> IO ()
 forEach xs f = mapIO f xs
 
 pure : a -> IO a
@@ -74,15 +75,15 @@ seq x y = x >>= \_ -> y
 forever : IO a -> IO ()
 forever m = m >>= (\_ -> forever m)
 
-data IOF a = PutS String (() -> a)    -- ^ the a is the next computation
+type IOF a = PutS String (() -> a)    -- ^ the a is the next computation
            | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
            | Exit Int         -- ^ since there is no parameter, this must terminate
            | WriteF { file : String, content : String} (() -> a)
 
-data IO a = Pure a
+type IO a = Pure a
           | Impure (IOF (IO a))
 
-type IOK r a = (a -> IOF r) -> IOF r
+type alias IOK r a = (a -> IOF r) -> IOF r
 
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of

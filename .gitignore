@@ -1,7 +1,5 @@
 *~
-build
-cache
-elm_dependencies
+elm-stuff
 dist/
 hello.js
 *.elmi
