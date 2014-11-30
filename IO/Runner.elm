@@ -1,7 +1,13 @@
 module IO.Runner where
 
 import Dict
-import Json as JSON
+import Json.Decode ((:=))
+import Json.Decode as JSD
+import Json.Encode as JSE
+import List ((::))
+import List
+import Result
+import Signal (Signal, (<~), foldp)
 import String
 import Trampoline
     
@@ -9,17 +15,17 @@ import IO.IO as IO
 import IO.IO (IO)
 
 -- Internal Request representation
-data IRequest = Put String
+type IRequest = Put String
               | Exit Int
               | Get
               | WriteFile { file : String, content : String}
-type IResponse = Maybe String
+type alias IResponse = Maybe String
 
 
 -- User-facing Request representation
-type Request = JSON.Value
-type Response = JSON.Value
-type IOState  = { buffer : String }
+type alias Request = JSD.Value
+type alias Response = JSD.Value
+type alias IOState  = { buffer : String }
 
 start : IOState 
 start = { buffer = "" }
@@ -31,32 +37,28 @@ run resps io =
       third (_, _, z)    = z
   in serialize << third <~ foldp f init resps
 
-deserialize : Response -> IResponse
-deserialize resp = 
-  case resp of
-    JSON.Object d -> 
-      case Dict.get "Just" d of
-        Just (JSON.String s) -> Just s
-        _                    -> Nothing
-    _        -> Nothing
+resDecoder : JSD.Decoder String
+resDecoder = ("Just" := JSD.string)
 
-serialize : [IRequest] -> JSON.Value
-serialize =
-  let mkObj = JSON.Object << Dict.fromList
-      serReq req = 
+deserialize : Response -> IResponse
+deserialize resp = Result.toMaybe (JSD.decodeValue resDecoder resp)
+
+serialize : List IRequest -> Request
+serialize reqs =
+  let serReq req = 
         case req of
-          Put s -> mkObj [ ("ctor", JSON.String "Put")
-                         , ("val",  JSON.String s)
+          Put s -> JSE.object [ ("ctor", JSE.string "Put")
+                              , ("val",  JSE.string s)
                          ]
-          Get -> mkObj [ ("ctor", JSON.String "Get") ]
-          Exit n -> mkObj [ ("ctor", JSON.String "Exit")
-                          , ("val", JSON.Number << toFloat <| n )
+          Get -> JSE.object [ ("ctor", JSE.string "Get") ]
+          Exit n -> JSE.object [ ("ctor", JSE.string "Exit")
+                               , ("val", JSE.int n )
                           ]
-          WriteFile { file, content} -> mkObj [ ("ctor", JSON.String "WriteFile")
-                                              , ("file", JSON.String file)
-                                              , ("content", JSON.String content)
-                                              ]
-    in JSON.Array << map serReq
+          WriteFile { file, content} -> JSE.object [ ("ctor", JSE.string "WriteFile")
+                                                   , ("file", JSE.string file)
+                                                   , ("content", JSE.string content)
+                                                   ]
+    in JSE.list (List.map serReq reqs)
 
 putS : String -> IRequest
 putS = Put
@@ -71,7 +73,7 @@ writeF : { file : String, content : String } -> IRequest
 writeF = WriteFile
 
 -- | Extract all of the requests that can be run now
-extractRequests : IO a -> State IOState ([IRequest], () -> IO a)
+extractRequests : IO a -> State IOState (List IRequest, () -> IO a)
 extractRequests io = 
   case io of
     IO.Pure x -> pure ([exit 0], \_ -> IO.Pure x)
@@ -87,14 +89,14 @@ extractRequests io =
             put ({ buffer = rest }) >>= \_ ->
             extractRequests (k c)
 
-flattenReqs : [IRequest] -> [IRequest]
+flattenReqs : List IRequest -> List IRequest
 flattenReqs rs =
   let loop rs acc n =
     if n >= 100
     then Trampoline.Continue (\_ -> loop rs acc 0)
     else 
       case rs of
-        []  -> Trampoline.Done <| reverse acc
+        []  -> Trampoline.Done <| List.reverse acc
         [r] -> loop [] (r::acc) (n+1)
         r1 :: r2 :: rs' ->
         case (r1, r2) of
@@ -104,7 +106,7 @@ flattenReqs rs =
     in Trampoline.trampoline <| loop rs [] 0
                          
 -- | We send a batch job of requests, all requests until IO blocks
-step : IResponse -> (() -> IO a) -> IOState -> (() -> IO a, IOState, [IRequest])
+step : IResponse -> (() -> IO a) -> IOState -> (() -> IO a, IOState, List IRequest)
 step resp io st = 
   let newST = case resp of 
         Nothing -> st
@@ -113,7 +115,7 @@ step resp io st =
   in (k, newST', rs)
 
 -- | State monad
-type State s a = s -> (s, a)
+type alias State s a = s -> (s, a)
 
 pure : a -> State s a
 pure x = \s -> (s, x)

@@ -6,7 +6,9 @@
     "source-directories": [
         "."
     ],
-    "exposed-modules": [ "IO.IO" ],
+    "exposed-modules": [ "IO.IO"
+                       , "IO.Runner" 
+                       ],
     "dependencies": {
         "elm-lang/core": "1.0.0 <= v < 2.0.0"
     }
