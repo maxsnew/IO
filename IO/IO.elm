@@ -71,7 +71,7 @@ seq x y = x >>= \_ -> y
 (>>>) : IO a -> IO b -> IO b
 (>>>) = seq
 
--- Has to be >>= not >> because of strictness!
+-- Has to be >>= not >>> because of strictness!
 forever : IO a -> IO ()
 forever m = m >>= (\_ -> forever m)
 

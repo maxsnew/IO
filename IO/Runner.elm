@@ -1,4 +1,4 @@
-module IO.Runner where
+module IO.Runner(Request, Response, run) where
 
 import Dict
 import Json.Decode ((:=))
