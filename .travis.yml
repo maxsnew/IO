@@ -1,11 +1,16 @@
 language: haskell
 install:
-  - git clone https://github.com/elm-lang/Elm.git
+  - git clone https://github.com/elm-lang/elm-compiler.git
+  - git clone https://github.com/elm-lang/elm-package.git
+  - git clone https://github.com/elm-lang/elm-make.git
+  - cd elm-make
   - cabal sandbox init
-  - cabal sandbox add-source Elm
+  - cabal sandbox add-source ../elm-compiler
+  - cabal sandbox add-source ../elm-package
   - cabal install
-  - sudo cp .cabal-sandbox/bin/elm    /usr/local/bin/elm
-  - sudo cp .cabal-sandbox/bin/elm-io /usr/local/bin/elm-io
+  - sudo cp .cabal-sandbox/bin/elm-make /usr/local/bin/elm
+  - cd ..
   - npm install jsdom
-before_script: elm-io test/Test.elm test.js
-script: echo "exit" | node test.js > /dev/null
+before_script: 
+  - elm-make --yes --output test.js test/Test.elm
+script: echo "exit" | ./elm-io.sh test.js > /dev/null
