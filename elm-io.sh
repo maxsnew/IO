@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <generated-js-file>"
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <generated-js-file> <output-file>"
     exit 1
 fi
 
@@ -64,10 +64,8 @@ read -d '' handler <<- EOF
 // Run!
 jsdom.env('<p>bleh</p>', [], callback);
 EOF
-TMPFILE=io-tmp$RANDOM.js
-touch $TMPFILE
-echo "$before" > $TMPFILE
-cat $1 >> $TMPFILE
-echo "$handler" >> $TMPFILE
-node $TMPFILE
-rm $TMPFILE
+
+touch $2
+echo "$before" > $2
+cat $1 >> $2
+echo "$handler" >> $2

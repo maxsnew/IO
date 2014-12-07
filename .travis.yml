@@ -11,5 +11,6 @@ install:
   - cd ..
   - npm install jsdom
 before_script: 
-  - ./elm-make/.cabal-sandbox/bin/elm-make --yes --output test.js test/Test.elm
-script: echo "exit" | ./elm-io.sh test.js > /dev/null
+  - ./elm-make/.cabal-sandbox/bin/elm-make --yes --output raw-test.js test/Test.elm
+  - ./elm-io.sh raw-test.js test.js
+script: echo "exit" | node test.js > /dev/null

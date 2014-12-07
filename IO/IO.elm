@@ -1,5 +1,26 @@
 module IO.IO where
 
+{-|
+
+A library for writing terminal-based scripts in elm.  The IO type
+provides an interface for constructing "computations" that may perform
+IO effects. Something with type `IO a` is a lazy computation that when
+run will produce an `a`, possibly IO side effects. See IO.Runner for
+how to run such a computation.
+
+# Stdout
+@docs putChar, putStr, putStrLn
+
+# Stdin
+@docs getChar, getLine, readUntil
+
+# File Operations
+@docs writeFile
+
+# Exit code
+@docs exit
+-}
+
 import List
 import String
 

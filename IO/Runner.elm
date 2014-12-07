@@ -1,5 +1,22 @@
 module IO.Runner(Request, Response, run) where
 
+{-| Once you've constructed your IO computation `foo : IO ()`, you
+can run it by adding the following to the file (Foo.elm) you're running:
+
+port requests : Signal IO.Runner.Request
+port requests = IO.Runner.run responses foo
+
+port responses : Signal IO.Runner.Response
+
+Then run `elm-make Foo.elm --output foo.js` to compile the program and
+`elm-io.sh foo.js` to run it. You will need `node` installed to run
+the program. Also you will need `npm install jsdom` in the directory
+where you are running the file or globally. The `elm-io.sh` script can
+be downloaded here:
+https://raw.githubusercontent.com/maxsnew/IO/master/elm-io.sh
+
+-}
+
 import Dict
 import Json.Decode ((:=))
 import Json.Decode as JSD
