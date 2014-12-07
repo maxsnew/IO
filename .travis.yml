@@ -8,9 +8,8 @@ install:
   - cabal sandbox add-source ../elm-compiler
   - cabal sandbox add-source ../elm-package
   - cabal install
-  - sudo cp .cabal-sandbox/bin/elm-make /usr/local/bin/elm
   - cd ..
   - npm install jsdom
 before_script: 
-  - elm-make --yes --output test.js test/Test.elm
+  - ./elm-make/.cabal-sandbox/bin/elm-make --yes --output test.js test/Test.elm
 script: echo "exit" | ./elm-io.sh test.js > /dev/null
