@@ -1,4 +1,17 @@
+#!/usr/bin/env bash
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <generated-js-file>"
+    exit 1
+fi
 
+read -d '' before <<- EOF
+var jsdom = require("jsdom");
+var callback = function(errors, window) {
+  var document = window.document;
+// Elm goes here:
+EOF
+
+read -d '' handler <<- EOF
 // Elm goes there ^
 (function(){
     var stdin = process.stdin;
@@ -50,3 +63,11 @@
 } // Close the callback
 // Run!
 jsdom.env('<p>bleh</p>', [], callback);
+EOF
+TMPFILE=io-tmp$RANDOM.js
+touch $TMPFILE
+echo "$before" > $TMPFILE
+cat $1 >> $TMPFILE
+echo "$handler" >> $TMPFILE
+node $TMPFILE
+rm $TMPFILE
