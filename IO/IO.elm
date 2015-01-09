@@ -32,8 +32,8 @@ putChar : Char -> IO ()
 putChar c = Impure (PutS (String.cons c "") (\_ -> Pure ()))
 
 {-| Read a character from stdin -}
-getChar : IO Char
-getChar = Impure (GetC Pure)
+-- getChar : IO Char
+-- getChar = Impure (GetC Pure)
 
 {-| Exit the program with the given exit code. -}
 exit : Int -> IO ()
@@ -48,20 +48,20 @@ putStrLn : String -> IO ()
 putStrLn s = putStr s >>> putChar '\n'
 
 {-| Read characters from stdin until one matches the given character. -}
-readUntil : Char -> IO String
-readUntil end = let go s = getChar >>= \c ->
-                           if c == end
-                           then pure s
-                           else go (String.append s (String.cons c ""))
-                in go ""
+-- readUntil : Char -> IO String
+-- readUntil end = let go s = getChar >>= \c ->
+--                            if c == end
+--                            then pure s
+--                            else go (String.append s (String.cons c ""))
+--                 in go ""
 
 {-| Write content to a file -}
-writeFile : { file : String, content : String } -> IO ()
-writeFile obj = Impure (WriteF obj (\_ -> Pure ()))
+-- writeFile : { file : String, content : String } -> IO ()
+-- writeFile obj = Impure (WriteF obj (\_ -> Pure ()))
 
 {-| Read a line from stdin -}
-getLine : IO String
-getLine = readUntil '\n'
+-- getLine : IO String
+-- getLine = readUntil '\n'
 
 -- | IO Combinators
 
@@ -117,9 +117,9 @@ forever : IO a -> IO ()
 forever m = m >>= (\_ -> forever m)
 
 type IOF a = PutS String (() -> a)    -- ^ the a is the next computation
-           | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
+           -- | GetC (Char -> a) -- ^ the (Char -> a) is the continuation
            | Exit Int         -- ^ since there is no parameter, this must terminate
-           | WriteF { file : String, content : String} (() -> a)
+           -- | WriteF { file : String, content : String} (() -> a)
 
 type IO a = Pure a
           | Impure (IOF (IO a))
@@ -129,9 +129,9 @@ type alias IOK r a = (a -> IOF r) -> IOF r
 mapF : (a -> b) -> IOF a -> IOF b
 mapF f iof = case iof of
   PutS p k -> PutS p (f << k)
-  GetC k   -> GetC (f << k)
+  -- GetC k   -> GetC (f << k)
   Exit n   -> Exit n
-  WriteF obj k -> WriteF obj (f << k)
+  -- WriteF obj k -> WriteF obj (f << k)
 
 -- | Not actually used, but maybe can be for the interpreter?
 foldIO : (a -> b) -> (IOF b -> b) -> IO a -> b
