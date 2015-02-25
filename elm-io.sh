@@ -4,18 +4,12 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-read -d '' before <<- EOF
-var jsdom = require("jsdom");
-var callback = function(errors, window) {
-  var document = window.document;
-// Elm goes here:
-EOF
-
 read -d '' handler <<- EOF
-// Elm goes there ^
 (function(){
     var stdin = process.stdin;
     var fs    = require('fs');
+    if (typeof Elm === "undefined") { throw "elm-io config error: Elm is not defined. Make sure you call elm-io with a real Elm output file"}
+    if (typeof Elm.Main === "undefined" ) { throw "Elm.Main is not defined, make sure your module is named Main." };
     var worker = Elm.worker(Elm.Main
                             , {responses: null }
                            );
@@ -60,12 +54,7 @@ read -d '' handler <<- EOF
     // Start msg
     worker.ports.responses.send(null);
 })();
-} // Close the callback
-// Run!
-jsdom.env('<p>bleh</p>', [], callback);
 EOF
 
-touch $2
-echo "$before" > $2
-cat $1 >> $2
+cat $1 > $2
 echo "$handler" >> $2
