@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "summary": "Terminal-based IO Side Effects",
     "repository": "https://github.com/maxsnew/IO.git",
     "license": "BSD3",
