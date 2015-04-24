@@ -1,6 +1,6 @@
 module Main where
 
-import IO.IO (..)
+import IO.IO exposing (..)
 
 console : IO ()
 console = putStrLn "Hello, Console!"       >>>

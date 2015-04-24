@@ -1,5 +1,5 @@
 module Main where
 
-import IO.IO (..)
+import IO.IO exposing (..)
 
 console = forever (putStrLn "sup")
