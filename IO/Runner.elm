@@ -18,18 +18,18 @@ https://raw.githubusercontent.com/maxsnew/IO/master/elm-io.sh
 -}
 
 import Dict
-import Json.Decode ((:=))
+import Json.Decode exposing ((:=))
 import Json.Decode as JSD
 import Json.Encode as JSE
-import List ((::))
+import List exposing ((::))
 import List
 import Result
-import Signal (Signal, (<~), foldp)
+import Signal exposing (Signal, (<~), foldp)
 import String
 import Trampoline
     
 import IO.IO as IO
-import IO.IO (IO)
+import IO.IO exposing (IO)
 
 -- Internal Request representation
 type IRequest = Put String
