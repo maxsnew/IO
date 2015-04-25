@@ -2,7 +2,7 @@ module Main where
 
 import IO.IO exposing (..)
 import IO.Runner exposing (Request, Response)
-import IO.Runner as Run
+import IO.Runner as IO
 
 import List
 import Maybe
@@ -26,6 +26,6 @@ hello = putStrLn "Hello, Console!" >>>
         exit 0
 
 port requests : Signal Request
-port requests = Run.run responses hello
+port requests = IO.run responses hello
 
 port responses : Signal Response
