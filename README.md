@@ -7,7 +7,7 @@ Elm.
 Example
 -------
 An elm Program:
-```haskell
+```elm
 module Main where
 
 import IO.IO (..)
