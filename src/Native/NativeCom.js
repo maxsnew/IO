@@ -53,7 +53,6 @@ Elm.Native.NativeCom.make = function(localRuntime) {
 
             return callback(Task.succeed(Utils.Tuple0));
         });
-      
     }
 
     var doRequest = function(request) {
