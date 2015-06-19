@@ -3,6 +3,7 @@
     "summary": "Terminal-based IO Side Effects",
     "repository": "https://github.com/maxsnew/IO.git",
     "license": "BSD3",
+    "native-modules": true,
     "source-directories": [
         "."
     ],

@@ -1,4 +1,4 @@
-module IO.Runner(Request, Response, run) where
+module IO.Runner(run) where
 
 {-| Once you've constructed your IO computation `foo : IO ()`, you
 can run it by adding the following to the file (Foo.elm) you're running:
@@ -26,56 +26,24 @@ import List
 import Result
 import Signal exposing (Signal, (<~), foldp)
 import String
+import Task exposing (Task)
 import Trampoline
     
 import IO.IO as IO
 import IO.IO exposing (IO)
+import IO.NativeCom as NativeCom exposing (IResponse, IRequest(Put, Get, Exit, WriteFile, Init))
 
--- Internal Request representation
-type IRequest = Put String
-              | Exit Int
-              | Get
-              | WriteFile { file : String, content : String}
-type alias IResponse = Maybe String
-
-
--- User-facing Request representation
-type alias Request = JSD.Value
-type alias Response = JSD.Value
 type alias IOState  = { buffer : String }
 
 start : IOState 
 start = { buffer = "" }
 
-run : Signal Response -> IO () -> Signal Request
-run resps io = 
-  let init               = (\_ -> io, start, [])
-      f resp (io, st, _) = step (deserialize resp) io st
+run : IO () -> Signal (Task x ())
+run io =
+  let init               = (\_ -> io, start, [Init])
+      f resp (io, st, _) = step resp io st
       third (_, _, z)    = z
-  in serialize << third <~ foldp f init resps
-
-resDecoder : JSD.Decoder String
-resDecoder = ("Just" := JSD.string)
-
-deserialize : Response -> IResponse
-deserialize resp = Result.toMaybe (JSD.decodeValue resDecoder resp)
-
-serialize : List IRequest -> Request
-serialize reqs =
-  let serReq req = 
-        case req of
-          Put s -> JSE.object [ ("ctor", JSE.string "Put")
-                              , ("val",  JSE.string s)
-                         ]
-          Get -> JSE.object [ ("ctor", JSE.string "Get") ]
-          Exit n -> JSE.object [ ("ctor", JSE.string "Exit")
-                               , ("val", JSE.int n )
-                          ]
-          WriteFile { file, content} -> JSE.object [ ("ctor", JSE.string "WriteFile")
-                                                   , ("file", JSE.string file)
-                                                   , ("content", JSE.string content)
-                                                   ]
-    in JSE.list (List.map serReq reqs)
+  in NativeCom.sendRequests (third <~ foldp f init NativeCom.responses)
 
 putS : String -> IRequest
 putS = Put
