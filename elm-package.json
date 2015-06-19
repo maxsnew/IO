@@ -5,7 +5,7 @@
     "license": "BSD3",
     "native-modules": true,
     "source-directories": [
-        "."
+        "src"
     ],
     "exposed-modules": [
         "IO.IO",
