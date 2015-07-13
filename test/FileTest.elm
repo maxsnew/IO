@@ -1,13 +1,13 @@
 module Main where
 
-import IO.IO exposing (..)
-import IO.Runner exposing (Request, Response, run)
+import IO exposing (..)
+import IO
+import Task
 
 console : IO ()
 console = writeFile { file = "Test.txt", content = "Hello, Test!\n" } >>>
           putStrLn "Printed to file: Test.txt"
 
-port requests : Signal Request
-port requests = run responses console
+port runner : Signal (Task.Task x ())
+port runner = run responses
 
-port responses : Signal Response

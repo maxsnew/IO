@@ -1,7 +1,7 @@
 module Main where
 
-import IO.IO exposing (..)
-import IO.Runner as IO
+import IO exposing (..)
+import IO
 
 import List
 import Maybe
