@@ -11,8 +11,8 @@ An elm Program:
 module Main where
 
 import IO.IO (..)
-import IO.Runner exposing (Request, Response)
-import IO.Runner as IO
+import IO
+import Task
 
 import List
 import Maybe
@@ -34,15 +34,13 @@ hello = putStrLn "Hello, Console!" >>>
         putStrLn "That's all, folks!" >>>
         exit 0
 
-port requests : Signal Request
-port requests = IO.run responses hello
-
-port responses : Signal Response
+port runner : Signal (Task.Task x ())
+port runner = IO.run hello
 ```
 
 link in some javascript and then run:
 ```
-$ elm-make --yes Test.elm raw-test.js
+$ elm-make --yes test/Test.elm raw-test.js
 ...
 $ ./elm-io.sh raw-test.js test.js
 $ node test.js
