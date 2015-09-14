@@ -1,15 +1,15 @@
 {
-    "version": "1.0.1",
+    "version": "2.0.0",
     "summary": "Terminal-based IO Side Effects",
     "repository": "https://github.com/maxsnew/IO.git",
     "license": "BSD3",
-    "native-modules": true,
     "source-directories": [
         "src"
     ],
     "exposed-modules": [
         "IO"
     ],
+    "native-modules": true,
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 3.0.0"
     },
