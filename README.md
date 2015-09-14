@@ -10,8 +10,7 @@ An elm Program:
 ```elm
 module Main where
 
-import IO.IO (..)
-import IO
+import IO exposing (IO, (>>>), (>>=), forever, getLine, pure, exit, putStrLn)
 import Task
 
 import List
